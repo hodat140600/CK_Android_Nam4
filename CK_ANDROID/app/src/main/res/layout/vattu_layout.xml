@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".Main.PhongkhoLayout"
+    >
+    <LinearLayout
+        android:layout_marginTop="10dp"
+        android:layout_marginHorizontal="10dp"
+        android:id="@+id/Toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        >
+        <Button
+            android:id="@+id/VT_exitBtn"
+            style="@style/Btn"
+            android:text="@string/thoat"
+            android:textColor="#ffffff"
+            android:backgroundTint="@color/thoatbtn_bgcolor"
+
+            />
+
+        <EditText
+            android:id="@+id/VT_searchEdit"
+            android:layout_width="match_parent"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:background="@drawable/round_corner"
+            android:drawableLeft="@drawable/outline_search_black_24"
+            android:padding="5dp"
+            android:textSize="15dp"
+            android:layout_marginVertical="4dp"
+            android:layout_marginHorizontal="10dp"
+            android:hint="@string/search"
+            android:layout_gravity="center"
+            >
+
+        </EditText>
+
+        <Button
+            android:id="@+id/VT_insertBtn"
+            style="@style/Btn"
+            android:layout_width="50dp"
+            app:icon="@drawable/outline_add_black_24"
+            app:iconGravity="textStart"
+            app:iconPadding="0dp"
+            app:iconTint="#000"
+            app:cornerRadius="100dp"
+            android:backgroundTint="@color/disable_color"
+            />
+    </LinearLayout>
+    <!-- + @+id/Toolbar + -->
+    <!--///////////////////////////////////////////////////////-->
+    <!-- + Table Container + -->
+    <LinearLayout
+        android:layout_weight="1"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        tools:context=".Main.NhanvienLayout"
+        >
+        <TextView
+            android:id="@+id/heading"
+            android:layout_below="@+id/toolbar"
+            style="@style/Heading"
+            android:text="Vật Tư"
+            />
+        <!--    Header of the table -->
+        <!--    70 p0 / 200 / 55 p0 / <= 85 p0-->
+        <TableLayout
+            style="@style/tableLayoutStyle"
+            android:layout_width="match_parent"
+            android:stretchColumns="3">
+            <TableRow>
+                <TextView
+                    style="@style/tableHeader"
+                    android:text="@string/ma_vt"
+                    android:layout_width="70dp"
+                    android:padding="0dp"
+                    />
+
+                <TextView
+                    style="@style/VTHeader_secCellWidth"
+                    android:text="@string/ten_vt"
+                    android:layout_width="200dp"/>
+
+                <TextView
+                    style="@style/tableHeader"
+                    android:text="@string/dvt"
+                    android:layout_width="55dp"
+                    android:padding="0dp"/>
+                <TextView
+                    style="@style/tableHeader"
+                    android:text="@string/gia"
+                    android:maxWidth="85dp"
+                    android:padding="0dp"/>
+            </TableRow>
+            <!--    Content of the table -->
+        </TableLayout>
+        <!--    70 p0 / 200 / 55 p0 / <= 55 p0-->
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TableLayout
+                android:id="@+id/VT_table_list"
+                style="@style/tableLayoutStyle"
+                android:stretchColumns="3"
+                >
+                <!--         Generate Row based on Data here   -->
+                <TableRow>
+                    <TextView
+                        style="@style/VTRow_firstCellWidth"
+                        android:layout_height="0dp"
+                        android:layout_width="70dp"
+                        android:padding="0dp"
+                        android:visibility="invisible"
+                        />
+                    <TextView
+                        style="@style/VTRow_secCellWidth"
+                        android:layout_width="200dp"
+                        android:layout_height="0dp"
+                        android:visibility="invisible"/>
+                    <TextView
+                        style="@style/tableRow"
+                        android:layout_width="55dp"
+                        android:layout_height="0dp"
+                        android:padding="0dp"
+                        android:visibility="invisible"/>
+                    <TextView
+                        style="@style/tableRow"
+                        android:layout_height="0dp"
+                        android:maxWidth="55dp"
+                        android:padding="0dp"
+                        android:visibility="invisible"
+                        />
+                </TableRow>
+            </TableLayout>
+        </ScrollView>
+    </LinearLayout>
+    <!--///////////////////////////////////////////////////////-->
+    <!-- + @+id/subToolbar + -->
+    <LinearLayout
+        android:layout_marginHorizontal="10dp"
+        android:layout_below="@+id/table_container"
+        android:id="@+id/subToolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <Button
+            android:id="@+id/VT_delBtn"
+            style="@style/Btn"
+            android:text="@string/xoa"
+            android:backgroundTint="#DD4545"
+            app:icon="@drawable/outline_delete_24"
+            app:iconGravity="textStart"
+            app:iconPadding="5dp"
+            app:iconTint="#000"
+            android:textColor="@color/black"
+            />
+        <Button
+            android:layout_marginLeft="10dp"
+            android:id="@+id/VT_editBtn"
+            style="@style/Btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/sua"
+            android:textColor="#000"
+            android:backgroundTint="#3C7AD8"
+            app:icon="@drawable/outline_settings_24"
+            app:iconGravity="textStart"
+            app:iconPadding="5dp"
+            app:iconTint="#000"
+            />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="horizontal"
+            android:gravity="right">
+            <Button
+                android:id="@+id/VT_previewBtn"
+                android:drawableLeft="@drawable/baseline_visibility_black_24"
+                style="@style/Btn"
+                android:paddingLeft="12dp"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:backgroundTint="#50E363"
+                android:layout_marginRight="5dp"/>
+            <Button
+                style="@style/Btn"
+                android:id="@+id/VT_navbar_capphat"
+                android:text="@string/chi_tiet_PN"
+                android:backgroundTint="@color/disable_color"
+                android:textColor="@color/black"
+                />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+
+        android:id="@+id/navbar"
+        android:layout_below="@+id/subtoolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center">
+        <Button
+            style="@style/Btn"
+            android:id="@+id/VT_navbar_phongkho"
+            android:backgroundTint="@color/disable_color"
+            android:textColor="@color/black"
+            android:text="@string/phong_kho"/>
+
+        <Button
+            style="@style/Btn"
+            android:id="@+id/VT_navbar_nhanvien"
+            android:backgroundTint="@color/disable_color"
+            android:textColor="@color/black"
+            android:text="@string/phieu_nhap"/>
+
+        <Button
+            style="@style/Btn"
+            android:id="@+id/VT_navbar_VT"
+            android:backgroundTint="@color/active_color"
+            android:textColor="@color/black"
+            android:text="@string/vt"/>
+
+    </LinearLayout>
+    <include
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="1dp"
+        layout="@layout/_created_by_xiiiteam"/>
+</LinearLayout>

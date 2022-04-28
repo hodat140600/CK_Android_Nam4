@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DesignSurface">
+    <option name="filePathToZoomLevelMap">
+      <map>
+        <entry key="..\:/Git Repo/GK_ANDROID/app/src/main/res/drawable/baseline_arrow_back_ios_24.xml" value="0.2255" />
+        <entry key="..\:/Git Repo/GK_ANDROID/app/src/main/res/drawable/outline_add_24.xml" value="0.2255" />
+        <entry key="..\:/Git Repo/GK_ANDROID/app/src/main/res/layout/_created_by_xiiiteam.xml" value="0.264" />
+        <entry key="..\:/Git Repo/GK_ANDROID/app/src/main/res/layout/activity_main.xml" value="0.2" />
+        <entry key="..\:/Git Repo/GK_ANDROID/app/src/main/res/layout/capphatvt_layout.xml" value="0.264" />
+        <entry key="..\:/Git Repo/GK_ANDROID/app/src/main/res/layout/chitietphieunhap_layout.xml" value="0.17956391620350576" />
+        <entry key="..\:/Git Repo/GK_ANDROID/app/src/main/res/layout/nhanvien_layout.xml" value="0.264" />
+        <entry key="..\:/Git Repo/GK_ANDROID/app/src/main/res/layout/phieunhap_layout.xml" value="0.20307823856348867" />
+        <entry key="..\:/Git Repo/GK_ANDROID/app/src/main/res/layout/phongkho_layout.xml" value="0.2" />
+        <entry key="..\:/Git Repo/GK_ANDROID/app/src/main/res/layout/popup_capphatvr.xml" value="0.2" />
+        <entry key="..\:/Git Repo/GK_ANDROID/app/src/main/res/layout/popup_capphatvt.xml" value="0.22530996152201796" />
+        <entry key="..\:/Git Repo/GK_ANDROID/app/src/main/res/layout/popup_chitietphieunhap.xml" value="0.264" />
+        <entry key="..\:/Git Repo/GK_ANDROID/app/src/main/res/layout/popup_nhanvien.xml" value="0.264" />
+        <entry key="..\:/Git Repo/GK_ANDROID/app/src/main/res/layout/popup_phieunhap.xml" value="0.20307823856348867" />
+        <entry key="..\:/Git Repo/GK_ANDROID/app/src/main/res/layout/popup_phongkho.xml" value="0.22530996152201796" />
+        <entry key="..\:/Git Repo/GK_ANDROID/app/src/main/res/layout/popup_vt.xml" value="0.264" />
+        <entry key="..\:/Git Repo/GK_ANDROID/app/src/main/res/layout/popup_vt_previewimage.xml" value="0.142368533561351" />
+        <entry key="..\:/Git Repo/GK_ANDROID/app/src/main/res/layout/test.xml" value="0.536" />
+        <entry key="..\:/Git Repo/GK_ANDROID/app/src/main/res/layout/tvtemplate.xml" value="0.1453612654980761" />
+        <entry key="..\:/Git Repo/GK_ANDROID/app/src/main/res/layout/vattu_layout.xml" value="0.176" />
+        <entry key="..\:/Git Repo/GK_ANDROID/app/src/main/res/layout/welcome.xml" value="0.25" />
+        <entry key="..\:/Git Repo/GK_Android_Nam4/GK_ANDROID/app/src/main/res/layout/_xincho_layout.xml" value="0.22521367521367522" />
+        <entry key="..\:/Git Repo/GK_Android_Nam4/GK_ANDROID/app/src/main/res/layout/activity_main.xml" value="0.2" />
+        <entry key="..\:/Git Repo/GK_Android_Nam4/GK_ANDROID/app/src/main/res/layout/baocao_layout.xml" value="0.22521367521367522" />
+        <entry key="..\:/Git Repo/GK_Android_Nam4/GK_ANDROID/app/src/main/res/layout/chitietphieunhap_layout.xml" value="0.2" />
+        <entry key="..\:/Git Repo/GK_Android_Nam4/GK_ANDROID/app/src/main/res/layout/phieunhap_layout.xml" value="0.17255434782608695" />
+        <entry key="..\:/Git Repo/GK_Android_Nam4/GK_ANDROID/app/src/main/res/layout/phongkho_layout.xml" value="0.22530996152201796" />
+        <entry key="..\:/Git Repo/GK_Android_Nam4/GK_ANDROID/app/src/main/res/layout/popup_chitietphieunhap.xml" value="0.2" />
+        <entry key="..\:/Git Repo/GK_Android_Nam4/GK_ANDROID/app/src/main/res/layout/popup_phieunhap.xml" value="0.20222317229585293" />
+        <entry key="..\:/Git Repo/GK_Android_Nam4/GK_ANDROID/app/src/main/res/layout/popup_phongkho.xml" value="0.22521367521367522" />
+        <entry key="..\:/Git Repo/GK_Android_Nam4/GK_ANDROID/app/src/main/res/layout/popup_vt.xml" value="0.22530996152201796" />
+        <entry key="..\:/Git Repo/GK_Android_Nam4/GK_ANDROID/app/src/main/res/layout/thong_ke_layout.xml" value="0.22521367521367522" />
+        <entry key="..\:/Git Repo/GK_Android_Nam4/GK_ANDROID/app/src/main/res/layout/tvtemplate.xml" value="0.18162393162393162" />
+        <entry key="..\:/Git Repo/GK_Android_Nam4/GK_ANDROID/app/src/main/res/layout/vattu_layout.xml" value="0.2" />
+      </map>
+    </option>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="1.8" project-jdk-type="JavaSDK">
+    <output url="file://$PROJECT_DIR$/build/classes" />
+  </component>
+  <component name="ProjectType">
+    <option name="id" value="Android" />
+  </component>
+</project>

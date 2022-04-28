@@ -1,0 +1,45 @@
+<resources>
+    <string name="app_name">Quản Lý Kho</string>
+    <string name="thoat">Thoát</string>
+    <string name="dau_cong">+</string>
+    <string name="xoa">Xóa</string>
+    <string name="sua">Sửa</string>
+    <string name="cap_phat_VT">Cấp phát VT</string>
+    <string name="phong_kho">Phòng kho</string>
+    <string name="nhan_vien">Nhân viên</string>
+    <string name="vt">VT</string>
+    <string name="search">Search</string>
+    <string name="ma_pk">Mã PK</string>
+    <string name="ten_pk">Tên PK</string>
+    <string name="phieu_nhap">Phiếu Nhập</string>
+    <string name="sophieu">Sô Phiếu</string>
+    <string name="nlp">Ngày Lập Phiếu</string>
+    <string name="chi_tiet_PN">Chi tiết PN</string>
+    <string name="ma_nv">Mã NV</string>
+    <string name="ten_nv">Tên NV</string>
+    <string name="ngay_sinh">Ngày sinh</string>
+    <string name="ma_vt">Mã VT</string>
+    <string name="ten_vt">Tên VT</string>
+    <string name="dvt">ĐVT</string>
+    <string name="gia_nhap">Giá nhập</string>
+    <string name="gia">Giá</string>
+    <string name="cai">Cái</string>
+    <string name="keo">Kéo</string>
+    <string name="combo_box_spinner">Combo Box - Spinner</string>
+    <string name="so_luong">Số lượng</string>
+    <string name="created_by_xiii_team">Created by XIII Team</string>
+    <string name="thong_ke">Thống kê</string>
+    <string name="pk">PK</string>
+    <string name="sl">SL</string>
+    <string name="ngay_cap">Ngày cấp</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="error_of_this_line">Error of this line</string>
+    <string name="don_vi_tinh">Đơn vị tính</string>
+    <string name="hinh">Hình</string>
+    <string name="tri_gia">Trị giá</string>
+    <string name="bao_cao">báo cáo</string>
+    <string name="so_luong_vt">Số lượng VT</string>
+    <string name="ngay_cap_phat">Ngày lập phiếu</string>
+
+</resources>
