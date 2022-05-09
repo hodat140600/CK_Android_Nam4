@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -26,16 +27,31 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.NetworkResponse;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+import com.example.myapplication.DB.VolleyMultipartRequest;
 import com.example.myapplication.Databases.VatTuDatabase;
-import com.example.myapplication.Entities.NhanVien;
 import com.example.myapplication.Entities.VatTu;
 import com.example.myapplication.R;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -109,6 +125,12 @@ public class VattuLayout extends AppCompatActivity {
     // Key Code
     int IMAGE_FOLDER = 1000;
     int PERMISSION_GRANTED = 1001;
+    String urlGetData = "http://192.168.1.9:8080/androidwebservice/VattuDB/getdata.php";
+    String urlInsert = "http://192.168.1.9:8080/androidwebservice/VattuDB/insert.php";
+    String urlCapNhat = "http://192.168.1.9:8080/androidwebservice/VattuDB/update.php";
+    String urlDelete = "http://192.168.1.9:8080/androidwebservice/VattuDB/delete.php";
+    ArrayList<VatTu> vatTuArrayList;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -140,13 +162,13 @@ public class VattuLayout extends AppCompatActivity {
     }
 
     private void filter(String toString) {
-        TableRow tr = (TableRow) vt_table_list.getChildAt(0);
-        int dem =1;
+        TableRow tr = null;
+        int dem =0;
         vt_table_list.removeAllViews();
-        vt_table_list.addView(tr);
+
         image_list.clear();
-        for (int k = 0; k < vtlist.size(); k++) {
-            VatTu vatTu = vtlist.get(k);
+        for (int k = 0; k < vatTuArrayList.size(); k++) {
+            VatTu vatTu = vatTuArrayList.get(k);
             if (vatTu.getMaVt().toLowerCase().trim().contains(toString.trim().toLowerCase()) || vatTu.getTenVt().toLowerCase().contains(toString.toLowerCase())) {
 
                 tr = createRow(VattuLayout.this, vatTu);
@@ -188,18 +210,13 @@ public class VattuLayout extends AppCompatActivity {
     }
 
     public void loadDatabase(){
-        vattuDB = new VatTuDatabase(this);
         vtlist = new ArrayList<>();
-        TableRow tr = null;
-        // Nếu không có dòng này thì nó sẽ báo lỗi Row quá to không thể nhét vào Cursor trong select
-        setCursorWindowImageSize(100 * 1024 * 1024); // 100 MB max
-        vtlist = vattuDB.select();
-        // Tag sẽ bắt đầu ở 1 vì phải cộng thêm thằng example đã có sẵn
-        for (int i = 0; i < vtlist.size(); i++) {
-            tr = createRow(this, vtlist.get(i));
-            tr.setId((int) i + 1);
-            vt_table_list.addView(tr);
-        }
+        vatTuArrayList = new ArrayList<>();
+        vt_table_list.removeAllViews();
+
+        vatTuArrayList.clear();
+        image_list.clear();
+        GetData(urlGetData);
     }
 
     public void setEvent(){
@@ -272,7 +289,7 @@ public class VattuLayout extends AppCompatActivity {
                 VT_IP_Gia = vtdialog.findViewById(R.id.VT_IP_Gia);
                 VT_IP_Hinh = vtdialog.findViewById(R.id.VT_IP_Hinh);
                 // Load Data
-                setDataImageView(VT_IP_Hinh, image_list.get(indexofRow -1));
+                setDataImageView(VT_IP_Hinh, image_list.get(indexofRow));
                 VT_IP_maVT.setText(focusMaVT.getText().toString().trim());
                 VT_IP_tenVT.setText(focusTenVT.getText().toString().trim());
                 VT_IP_DVT.setText(focusDVT.getText().toString().trim());
@@ -349,7 +366,7 @@ public class VattuLayout extends AppCompatActivity {
     public void setNormalBGTableRows(TableLayout list) {
         // 0: là thằng example đã INVISIBLE
         // Nên bắt đầu từ 1 -> 9
-        for (int i = 1; i < list.getChildCount(); i++) {
+        for (int i = 0; i < list.getChildCount(); i++) {
             TableRow row = (TableRow) list.getChildAt((int) i);
             if (indexofRow != (int) row.getId())
                 row.setBackgroundColor(getResources().getColor(R.color.white));
@@ -371,7 +388,7 @@ public class VattuLayout extends AppCompatActivity {
                 focusTenVT = (TextView) focusRow.getChildAt(1);
                 focusDVT = (TextView) focusRow.getChildAt(2);
                 focusGia = (TextView) focusRow.getChildAt(3);
-                focusDataHinh = image_list.get( focusRow.getId() - Integer.parseInt("1") );
+                focusDataHinh = image_list.get( focusRow.getId());
                 setNormalBGTableRows(list);
             }
         });
@@ -512,17 +529,8 @@ public class VattuLayout extends AppCompatActivity {
                                 inputDVT.getText().toString().trim() + "",
                                 inputGia.getText().toString().trim()+"",
                                 getImageDataPicker());
-                        if (vattuDB.insert(vt) == -1) break;
-//                        Log.d("process","2True");
+                        ThemVatTu(urlInsert,vt);
                         inputHinh.setImageDrawable(null);
-                        TableRow tr = createRow(VattuLayout.this, vt);
-                        int n = vt_table_list.getChildCount();
-                        tr.setId(n);
-                        vt_table_list.addView(tr);
-                        Log.d("insert",image_list.size()+"");
-                        image_list.add(vt.getHinh());
-                        Log.d("insert",image_list.size()+"");
-                        setEventTableRows((TableRow) vt_table_list.getChildAt(n), vt_table_list);
                         editBtn.setVisibility(View.INVISIBLE);
                         delBtn.setVisibility(View.INVISIBLE);
                         previewBtn.setVisibility(View.INVISIBLE);
@@ -532,8 +540,6 @@ public class VattuLayout extends AppCompatActivity {
                         focusDVT = null;
                         focusGia = null;
                         focusDataHinh = null;
-                        success = true;
-                        vtlist = vattuDB.select();
                     }
                     break;
                     case R.id.VT_editBtn: {
@@ -546,39 +552,22 @@ public class VattuLayout extends AppCompatActivity {
                                 inputDVT.getText().toString().trim() + "",
                                 inputGia.getText().toString().trim()+"",
                                 getImageDataPicker() );
-                        if( vattuDB.update( vt ) == -1 ) {
-                            break;
-                        }
-                        vtlist = vattuDB.select();
+                        CapNhatVatTu(urlCapNhat,vt);
                         focusTenVT.setText( inputTenVT.getText().toString().trim() + "");
                         focusDVT.setText( inputDVT.getText().toString().trim() + "");
                         focusGia.setText( inputGia.getText().toString().trim() + "");
-                        image_list.set( indexofRow-1, vt.getHinh() );
                         focusDataHinh = vt.getHinh();
-                        success = true;
                     }
                     break;
                     case R.id.VT_delBtn: {
-                        if( vattuDB.delete(
+                        XoaVatTu(urlDelete,
                                 new VatTu(
                                         focusMaVT.getText().toString().trim()+"",
                                         focusTenVT.getText().toString().trim()+"",
                                         focusDVT.getText().toString().trim() + "",
                                         focusGia.getText().toString().trim()+"",
                                         focusDataHinh
-                                ))
-                                == -1 ) break;
-                        if (indexofRow == vt_table_list.getChildCount() - 1) {
-                            vt_table_list.removeViewAt(indexofRow);
-                        } else {
-                            vt_table_list.removeViewAt(indexofRow);
-                            for (int i = 0; i < vt_table_list.getChildCount(); i++) {
-                                vt_table_list.getChildAt(i).setId((int) i);
-                            }
-                        }
-                        Log.d("del",image_list.size()+"");
-                        image_list.remove(indexofRow -1);
-                        Log.d("del",image_list.size()+"");
+                                ));
                         editBtn.setVisibility(View.INVISIBLE);
                         delBtn.setVisibility(View.INVISIBLE);
                         previewBtn.setVisibility(View.INVISIBLE);
@@ -588,31 +577,10 @@ public class VattuLayout extends AppCompatActivity {
                         focusDVT = null;
                         focusGia = null;
                         focusDataHinh = null;
-                        success = true;
                     }
                     break;
                     default:
                         break;
-                }
-                if (success) {
-                    showResult.setText(showLabel.getText() + " thành công !");
-                    showResult.setTextColor(getResources().getColor(R.color.yes_color));
-                    showResult.setVisibility(View.VISIBLE);
-                    new Handler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            inputMaVT.setText("");
-                            inputTenVT.setText("");
-                            inputDVT.setText("");
-                            inputGia.setText("");
-                            showResult.setVisibility(View.INVISIBLE);
-                            vtdialog.dismiss();
-                        }
-                    }, 1000);
-                } else {
-                    showResult.setTextColor(getResources().getColor(R.color.thoatbtn_bgcolor));
-                    showResult.setText(showLabel.getText() + " thất bại !");
-                    showResult.setVisibility(View.VISIBLE);
                 }
             }
         });
@@ -720,8 +688,8 @@ public class VattuLayout extends AppCompatActivity {
         // Cần cái này để khi mà maVT đạt tới max width thì nó sẽ tăng height cho bên tenVT luôn
         // Lưu ý!! : khi đặt LayoutParams thì phải theo thằng cố nội và phải có weight
         maVT.setLayoutParams(new TableRow.LayoutParams(TableLayout.LayoutParams.FILL_PARENT, TableLayout.LayoutParams.FILL_PARENT, 10.0f));
-        maVT.setMaxWidth(DPtoPix(70));
-        maVT.setPadding(0,0,0,0);
+        maVT.setWidth(DPtoPix(80));
+//        maVT.setPadding(0,0,0,0);
         maVT.setText(vt.getMaVt());
 
         //   Ten VT
@@ -729,19 +697,19 @@ public class VattuLayout extends AppCompatActivity {
         // Cần cái này để khi mà tenVT đạt tới max width thì nó sẽ tăng height cho bên maVT luôn
         tenVT.setLayoutParams(new TableRow.LayoutParams(TableLayout.LayoutParams.FILL_PARENT, TableLayout.LayoutParams.FILL_PARENT, 10.0f));
         tenVT.setText(vt.getTenVt());
-        tenVT.setMaxWidth(DPtoPix(200));
+        tenVT.setWidth(DPtoPix(205));
 
         TextView dvt = (TextView) getLayoutInflater().inflate(R.layout.tvtemplate, null);
         dvt.setLayoutParams(new TableRow.LayoutParams(TableLayout.LayoutParams.FILL_PARENT, TableLayout.LayoutParams.FILL_PARENT, 10.0f));
         dvt.setText(vt.getDvt());
-        dvt.setPadding(0,0,0,0);
-        dvt.setMaxWidth(DPtoPix(55));
+//        dvt.setPadding(0,0,0,0);
+        dvt.setWidth(DPtoPix(80));
 
         TextView gianhap = (TextView) getLayoutInflater().inflate(R.layout.tvtemplate, null);
         gianhap.setLayoutParams(new TableRow.LayoutParams(TableLayout.LayoutParams.FILL_PARENT, TableLayout.LayoutParams.FILL_PARENT, 10.0f));
         gianhap.setText(vt.getGiaNhap());
-        gianhap.setPadding(0,0,0,0);
-        gianhap.setMaxWidth(DPtoPix(55));
+//        gianhap.setPadding(0,0,0,0);
+        gianhap.setWidth(DPtoPix(90));
 
         image_list.add(vt.getHinh());
 
@@ -770,5 +738,180 @@ public class VattuLayout extends AppCompatActivity {
                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                 | View.SYSTEM_UI_FLAG_FULLSCREEN
                 | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
+    }
+    public void SuccesssDialog(){
+        showResult.setText(showLabel.getText() + " thành công !");
+        showResult.setTextColor(getResources().getColor(R.color.yes_color));
+        showResult.setVisibility(View.VISIBLE);
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                inputMaVT.setText("");
+                inputTenVT.setText("");
+                inputDVT.setText("");
+                inputGia.setText("");
+                showResult.setVisibility(View.INVISIBLE);
+                vtdialog.dismiss();
+            }
+        }, 1000);
+    }
+    public void ErrorDialog(){
+        showResult.setTextColor(getResources().getColor(R.color.thoatbtn_bgcolor));
+        showResult.setText(showLabel.getText() + " thất bại !");
+        showResult.setVisibility(View.VISIBLE);
+    }
+    //API
+    private void ThemVatTu(String url, VatTu vatTu){
+        RequestQueue mRequestQueue = Volley.newRequestQueue(this);
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                if (response.trim().equalsIgnoreCase("success")) {
+                    Toast.makeText(VattuLayout.this, "Them Thanh Cong!", Toast.LENGTH_SHORT).show();
+                    GetData(urlGetData);
+                    SuccesssDialog();
+                }else{
+                    Toast.makeText(VattuLayout.this, "That Bai!", Toast.LENGTH_SHORT).show();
+                    ErrorDialog();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(VattuLayout.this, "Loi!", Toast.LENGTH_SHORT).show();
+                ErrorDialog();
+            }
+        })
+        {
+            @Nullable
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> params = new HashMap<>();
+                String mvt = vatTu.getMaVt();
+                String tvt = vatTu.getTenVt();
+                String dvt = vatTu.getDvt();
+                String gia = new String(vatTu.getHinh());
+                String hinh = vatTu.getGiaNhap();
+                final String imageString = Base64.encodeToString(vatTu.getHinh(), Base64.DEFAULT);
+                params.put("mavt",vatTu.getMaVt());
+                params.put("tenvt",vatTu.getTenVt());
+                params.put("dvt",vatTu.getDvt());
+                params.put("hinh",imageString);
+                params.put("gianhap",vatTu.getGiaNhap());
+
+                return params;
+            }
+        };
+        mRequestQueue.add(stringRequest);
+
+    }
+    private void CapNhatVatTu(String url, VatTu vatTu){
+        RequestQueue requestQueue = Volley.newRequestQueue(this);
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                if (response.trim().equalsIgnoreCase("success")){
+                    SuccesssDialog();
+                    vt_table_list.removeAllViews();
+                    GetData(urlGetData);
+                }
+                else{
+                    ErrorDialog();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                ErrorDialog();
+            }
+        }){
+            @Nullable
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> params = new HashMap<>();
+                final String imageString = Base64.encodeToString(vatTu.getHinh(), Base64.DEFAULT);
+                params.put("mavt",vatTu.getMaVt());
+                params.put("tenvt",vatTu.getTenVt());
+                params.put("dvt",vatTu.getDvt());
+                params.put("hinh",imageString);
+                params.put("gianhap",vatTu.getGiaNhap());
+                return params;
+            }
+        };
+        requestQueue.add(stringRequest);
+    }
+    private void XoaVatTu(String url, VatTu vatTu){
+        RequestQueue requestQueue = Volley.newRequestQueue(this);
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, urlDelete, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                String data = response.trim();
+                if (response.trim().equalsIgnoreCase("success")){
+                    Toast.makeText(VattuLayout.this, "Xoa Thành Công!", Toast.LENGTH_SHORT).show();
+                    SuccesssDialog();
+                    vt_table_list.removeAllViews();
+                    GetData(urlGetData);
+                }
+                else{
+                    Toast.makeText(VattuLayout.this, "Lỗi Xoa!", Toast.LENGTH_SHORT).show();
+                    ErrorDialog();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(VattuLayout.this, "Xảy ra lỗi !", Toast.LENGTH_SHORT).show();
+                Log.d("AAA", "Lỗi! \n" + error.toString());
+                ErrorDialog();
+            }
+        }){
+            @Nullable
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> params = new HashMap<>();
+                params.put("mavt",vatTu.getMaVt().trim());
+                return params;
+            }
+        };
+        requestQueue.add(stringRequest);
+    }
+    private void GetData(String url){
+
+        RequestQueue mRequestQueue = Volley.newRequestQueue(this);
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
+            @Override
+            public void onResponse(JSONArray response) {
+                vt_table_list.removeAllViews();
+                vatTuArrayList.clear();
+                image_list.clear();
+                for (int i = 0; i < response.length(); i++){
+                    try {
+                        JSONObject jsonObject = response.getJSONObject(i);
+                        vatTuArrayList.add(new VatTu(jsonObject.getString("MaVT"),
+                                jsonObject.getString("TenVT"), jsonObject.getString("Dvt"),
+                                jsonObject.getString("GiaNhap"),Base64.decode(jsonObject.getString("Hinh"), Base64.DEFAULT)));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+                TableRow tr = null;
+                int dem = 0;
+                for (int i = 0; i < vatTuArrayList.size(); i++) {
+                    tr = createRow(VattuLayout.this, vatTuArrayList.get(i));
+                    tr.setId((dem = i));
+                    vt_table_list.addView(tr);
+                    setEventTableRows(tr, vt_table_list);
+                }
+            }
+        },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(VattuLayout.this, "Loi!", Toast.LENGTH_SHORT).show();
+
+                    }
+                }
+        );
+        mRequestQueue.add(jsonArrayRequest);
     }
 }

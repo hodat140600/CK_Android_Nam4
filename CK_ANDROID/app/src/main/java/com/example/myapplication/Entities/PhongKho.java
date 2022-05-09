@@ -4,10 +4,18 @@ public class PhongKho {
     //    private long id;
     private String mapk;
     private String tenpk;
+    private String diachi;
+    private String sdt;
 
     public PhongKho(String mapb, String tenpb) {
         this.mapk = mapb;
         this.tenpk = tenpb;
+    }
+    public PhongKho(String mapb, String tenpb, String diachi, String sdt) {
+        this.mapk = mapb;
+        this.tenpk = tenpb;
+        this.diachi = diachi;
+        this.sdt = sdt;
     }
 
 //    public PhongBan(long id, String mapb, String tenpb) {
@@ -52,5 +60,20 @@ public class PhongKho {
 
     public void setTenpk(String tenpk) {
         this.tenpk = tenpk;
+    }
+    public String getDiachi() {
+        return diachi;
+    }
+
+    public void setDiachi(String diachi) {
+        this.diachi = diachi;
+    }
+
+    public String getSdt() {
+        return sdt;
+    }
+
+    public void setSdt(String sdt) {
+        this.sdt = sdt;
     }
 }

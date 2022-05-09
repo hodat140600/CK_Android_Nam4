@@ -3,6 +3,11 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Git Repo/CK_Android_Nam4/CK_ANDROID/app/src/main/res/layout/phongkho_layout.xml" value="0.4" />
+        <entry key="..\:/Git Repo/CK_Android_Nam4/CK_ANDROID/app/src/main/res/layout/popup_phieunhap.xml" value="0.22264957264957264" />
+        <entry key="..\:/Git Repo/CK_Android_Nam4/CK_ANDROID/app/src/main/res/layout/popup_phongkho.xml" value="0.20982905982905983" />
+        <entry key="..\:/Git Repo/CK_Android_Nam4/CK_ANDROID/app/src/main/res/layout/popup_vt.xml" value="0.20982905982905983" />
+        <entry key="..\:/Git Repo/CK_Android_Nam4/CK_ANDROID/app/src/main/res/layout/vattu_layout.xml" value="0.22264957264957264" />
         <entry key="..\:/Git Repo/GK_ANDROID/app/src/main/res/drawable/baseline_arrow_back_ios_24.xml" value="0.2255" />
         <entry key="..\:/Git Repo/GK_ANDROID/app/src/main/res/drawable/outline_add_24.xml" value="0.2255" />
         <entry key="..\:/Git Repo/GK_ANDROID/app/src/main/res/layout/_created_by_xiiiteam.xml" value="0.264" />
