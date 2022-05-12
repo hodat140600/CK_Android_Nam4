@@ -24,15 +24,16 @@ import java.util.Map;
 
 import androidx.annotation.Nullable;
 
-public class ChiTietPhieuNhapDB {
-    public String urlGetData = "http://192.168.1.7:8080/androidwebservice/CTPhieuNhapDB/getdata.php";
-    public String urlGetDataAll = "http://192.168.1.7:8080/androidwebservice/CTPhieuNhapDB/getdataALL.php";
-    public String urlGetDataIndex = "http://192.168.1.7:8080/androidwebservice/CTPhieunhapDB/getdataIndex1.php";
-    public String urlGetDataIndexBC = "http://192.168.1.7:8080/androidwebservice/CTPhieunhapDB/getdataIndex1BC.php";
-    public String urlGetDataPnIndexPk = "http://192.168.1.7:8080/androidwebservice/CTPhieunhapDB/getdataPnIndexPK.php";
-    public String urlInsert = "http://192.168.1.7:8080/androidwebservice/CTPhieunhapDB/insert.php";
-    public String urlCapNhat = "http://192.168.1.7:8080/androidwebservice/CTPhieunhapDB/update.php";
-    public String urlDelete = "http://192.168.1.7:8080/androidwebservice/CTPhieunhapDB/delete.php";
+public class ChiTietPhieuNhapDB extends Connect{
+    public String urlGetData = connect + "CTPhieuNhapDB/getdata.php";
+    public String urlGetDataChart = connect + "CTPhieuNhapDB/getdataChart.php";
+    public String urlGetDataAll = connect + "CTPhieuNhapDB/getdataALL.php";
+    public String urlGetDataIndex = connect + "CTPhieunhapDB/getdataIndex1.php";
+    public String urlGetDataIndexBC = connect + "CTPhieunhapDB/getdataIndex1BC.php";
+    public String urlGetDataPnIndexPk = connect + "CTPhieunhapDB/getdataPnIndexPK.php";
+    public String urlInsert = connect + "CTPhieunhapDB/insert.php";
+    public String urlCapNhat = connect + "CTPhieunhapDB/update.php";
+    public String urlDelete = connect + "CTPhieunhapDB/delete.php";
     public ChiTietPhieuNhapDB(){
 
     }
@@ -182,6 +183,33 @@ public class ChiTietPhieuNhapDB {
         };
 
         mRequestQueue.add(stringRequest);
+    }
+    public void GetDataChart(List<String> list, Context context, final VolleyCallBack callBack){
+        RequestQueue mRequestQueue = Volley.newRequestQueue(context);
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, urlGetDataChart, null, new Response.Listener<JSONArray>() {
+            @Override
+            public void onResponse(JSONArray response) {
+                list.clear();
+                for (int i = 0; i < response.length(); i++){
+                    try {
+                        JSONObject jsonObject = response.getJSONObject(i);
+                        list.add(jsonObject.getString("MaPK"));
+                        list.add(jsonObject.getString("TongSL"));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+                callBack.onSuccess();
+            }
+        },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        callBack.onError(error.toString());
+                    }
+                }
+        );
+        mRequestQueue.add(jsonArrayRequest);
     }
 
     public void ThemCTPhieuNhap(ChiTietPhieuNhap chiTietPhieuNhap, Context context,final VolleyCallBack callBack){

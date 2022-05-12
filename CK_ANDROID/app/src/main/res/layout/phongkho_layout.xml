@@ -212,14 +212,21 @@
             android:id="@+id/PK_navbar_phongkho"
             android:backgroundTint="@color/active_color"
             android:textColor="@color/black"
-            android:text="@string/phong_kho"/>
+            android:text="PK"/>
 
         <Button
             style="@style/Btn"
-            android:id="@+id/PK_navbar_nhanvien"
+            android:id="@+id/PK_navbar_nv"
             android:backgroundTint="@color/disable_color"
             android:textColor="@color/black"
-            android:text="@string/phieu_nhap"/>
+            android:text="NV"/>
+
+        <Button
+            style="@style/Btn"
+            android:id="@+id/PK_navbar_pn"
+            android:backgroundTint="@color/disable_color"
+            android:textColor="@color/black"
+            android:text="PN"/>
 
         <Button
             style="@style/Btn"

@@ -216,21 +216,28 @@
             android:id="@+id/VT_navbar_phongkho"
             android:backgroundTint="@color/disable_color"
             android:textColor="@color/black"
-            android:text="@string/phong_kho"/>
+            android:text="PK"/>
 
         <Button
             style="@style/Btn"
             android:id="@+id/VT_navbar_nhanvien"
             android:backgroundTint="@color/disable_color"
             android:textColor="@color/black"
-            android:text="@string/phieu_nhap"/>
+            android:text="NV"/>
+
+        <Button
+            style="@style/Btn"
+            android:id="@+id/VT_navbar_phieunhap"
+            android:backgroundTint="@color/disable_color"
+            android:textColor="@color/black"
+            android:text="PN"/>
 
         <Button
             style="@style/Btn"
             android:id="@+id/VT_navbar_VT"
             android:backgroundTint="@color/active_color"
             android:textColor="@color/black"
-            android:text="@string/vt"/>
+            android:text="VT"/>
 
     </LinearLayout>
     <include

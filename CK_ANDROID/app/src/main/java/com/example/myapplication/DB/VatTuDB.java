@@ -27,11 +27,11 @@ import java.util.Map;
 
 import androidx.annotation.Nullable;
 
-public class VatTuDB {
-    public String urlGetData = "http://192.168.1.7:8080/androidwebservice/VattuDB/getdata.php";
-    public String urlInsert = "http://192.168.1.7:8080/androidwebservice/VattuDB/insert.php";
-    public String urlCapNhat = "http://192.168.1.7:8080/androidwebservice/VattuDB/update.php";
-    public String urlDelete = "http://192.168.1.7:8080/androidwebservice/VattuDB/delete.php";
+public class VatTuDB extends Connect{
+    public String urlGetData = connect + "VattuDB/getdata.php";
+    public String urlInsert = connect + "VattuDB/insert.php";
+    public String urlCapNhat = connect + "VattuDB/update.php";
+    public String urlDelete = connect + "VattuDB/delete.php";
 
 
     public VatTuDB(){}

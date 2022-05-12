@@ -26,12 +26,12 @@ import java.util.Map;
 
 import androidx.annotation.Nullable;
 
-public class PhieuNhapDB {
-    public String urlGetData = "http://192.168.1.7:8080/androidwebservice/PhieunhapDB/getdata.php";
-    public String urlGetDataPK = "http://192.168.1.7:8080/androidwebservice/PhieunhapDB/getdataPK.php";
-    public String urlInsert = "http://192.168.1.7:8080/androidwebservice/PhieunhapDB/insert.php";
-    public String urlCapNhat = "http://192.168.1.7:8080/androidwebservice/PhieunhapDB/update.php";
-    public String urlDelete = "http://192.168.1.7:8080/androidwebservice/PhieunhapDB/delete.php";
+public class PhieuNhapDB extends Connect{
+    public String urlGetData = connect + "PhieunhapDB/getdata.php";
+    public String urlGetDataPK = connect + "PhieunhapDB/getdataPK.php";
+    public String urlInsert = connect + "PhieunhapDB/insert.php";
+    public String urlCapNhat = connect + "PhieunhapDB/update.php";
+    public String urlDelete = connect + "PhieunhapDB/delete.php";
 
     public PhieuNhapDB(){
 

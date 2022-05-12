@@ -22,6 +22,7 @@ import android.widget.Spinner;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.myapplication.DB.NhanVienDB;
 import com.example.myapplication.DB.PhongKhoDB;
@@ -31,7 +32,6 @@ import com.example.myapplication.R;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.List;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
@@ -53,7 +53,8 @@ public class NhanvienLayout extends AppCompatActivity {
     Button navPK;
     Button navNV;
     Button navVT;
-    Button navCP;
+    Button navPN;
+    Button navCTPN;
 
     // Dialog Layout
     Dialog nhanviendialog;
@@ -68,6 +69,7 @@ public class NhanvienLayout extends AppCompatActivity {
 
     EditText inputMaNV;
     EditText inputTenNV;
+    EditText inputMailNV;
 
     DatePicker datepickerNSNV;
 
@@ -92,6 +94,7 @@ public class NhanvienLayout extends AppCompatActivity {
     TableRow focusRow;
     TextView focusMaNV;
     TextView focusTenNV;
+    TextView focusMailNV;
     TextView focusNSNV;
     String focusPKNV;
 
@@ -168,7 +171,8 @@ public class NhanvienLayout extends AppCompatActivity {
         navPK = findViewById(R.id.NV_navbar_phongkho);
         navNV = findViewById(R.id.NV_navbar_nhanvien);
         navVT = findViewById(R.id.NV_navbar_VT);
-        navCP = findViewById(R.id.NV_navbar_capphat);
+        navPN = findViewById(R.id.NV_navbar_PN);
+        navCTPN = findViewById(R.id.NV_navbar_capphat);
     }
 
     public void loadDatabase() {
@@ -187,6 +191,7 @@ public class NhanvienLayout extends AppCompatActivity {
                     tr = createRow(NhanvienLayout.this, nhanvienlist.get(i));
                     tr.setId((int) i + 1);
                     nhanvien_table_list.addView(tr);
+                    setEventTableRows(tr, nhanvien_table_list);
                 }
             }
 
@@ -258,8 +263,19 @@ public class NhanvienLayout extends AppCompatActivity {
             }
 
         });
+        navPN.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+                Intent intent = new Intent(NhanvienLayout.this, PhieuNhapLayout.class);
+                overridePendingTransition(R.anim.slide_from_right, R.anim.slide_to_left);
+                startActivity(intent);
+
+            }
+
+        });
         // navCP
-        navCP.setOnClickListener(new View.OnClickListener() {
+        navCTPN.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(NhanvienLayout.this, ChiTietPhieuNhapLayout.class);
@@ -413,6 +429,11 @@ public class NhanvienLayout extends AppCompatActivity {
                     PK_spinner_mini.setSelection(index);
                     inputMaNV.setText(focusMaNV.getText());
                     inputTenNV.setText(focusTenNV.getText());
+                    for(int i = 0; i < nhanvienlist.size(); i++) {
+                        if(nhanvienlist.get(i).getMaNv().equals(focusMaNV.getText())) {
+                            inputMailNV.setText(nhanvienlist.get(i).getEmail());
+                        }
+                    }
                     datepickerNSNV.updateDate(date[2], date[1] - 1, date[0]);
                     inputMaNV.setEnabled(false);
 
@@ -448,6 +469,11 @@ public class NhanvienLayout extends AppCompatActivity {
                     PK_spinner_mini.setSelection(index);
                     inputMaNV.setText(focusMaNV.getText());
                     inputTenNV.setText(focusTenNV.getText());
+                    for(int i = 0; i < nhanvienlist.size(); i++) {
+                        if(nhanvienlist.get(i).getMaNv().equals(focusMaNV.getText())) {
+                            inputMailNV.setText(nhanvienlist.get(i).getEmail());
+                        }
+                    }
                     datepickerNSNV.updateDate(date[2], date[1] - 1, date[0]);
                     PK_spinner_mini.setEnabled(false);
                     inputMaNV.setEnabled(false);
@@ -542,6 +568,7 @@ public class NhanvienLayout extends AppCompatActivity {
 
         inputMaNV = nhanviendialog.findViewById(R.id.NV_inputMaNV);
         inputTenNV = nhanviendialog.findViewById(R.id.NV_inputTenNV);
+        inputMailNV = nhanviendialog.findViewById(R.id.NV_inputMailNV);
 
         datepickerNSNV = nhanviendialog.findViewById(R.id.NV_inputNS);
 
@@ -584,38 +611,54 @@ public class NhanvienLayout extends AppCompatActivity {
                                 inputMaNV.getText().toString().trim() + ""
                                 , inputTenNV.getText().toString().trim() + ""
                                 , strDate
-                                , PK_spinner_mini_maPK.trim());
-//                        Log.d("process",PB_spinner_mini_maPB.trim()+"");
-//                        Log.d("process",PB_spinner_maPB.trim()+"");
-//                        Log.d("process",strDate.trim()+"");
-//                        Log.d("process",nv.toString());
-//                        if (nhanvienDB.insert(nv) == -1) break;
-//                        Log.d("process","2True");
-                        TableRow tr = createRow(NhanvienLayout.this, nv);
-                        int n = nhanvien_table_list.getChildCount();
-                        tr.setId(n);
-                        if (!PK_spinner_mini_maPK.trim().equals(PK_spinner_maPK.trim())) {
-                            // Nếu thằng bên trong là phòng kho nhưng bên ngoài là tất cả phòng kho thì
-                            if (PK_spinner_maPK.trim().equals("All")) {
-                                // cứ insert như bth
-                                nhanvien_table_list.addView(tr);
-                                setEventTableRows((TableRow) nhanvien_table_list.getChildAt(n), nhanvien_table_list);
+                                , PK_spinner_mini_maPK.trim(), inputMailNV.getText().toString().trim() + "");
+                        nhanvienDB.ThemNhanVien(nv, NhanvienLayout.this, new NhanVienDB.VolleyCallBack() {
+                            @Override
+                            public void onSuccess() {
+
                             }
-                            // Nếu thằng bên trong là phòng ban nhưng bên ngoài là phòng ban khác thì khỏi thêm table
-                            // Nếu trùng
-                        } else {
-                            nhanvien_table_list.addView(tr);
-                            setEventTableRows((TableRow) nhanvien_table_list.getChildAt(n), nhanvien_table_list);
-                        }
-                        nhanvienlist.add(nv);
-                        editBtn.setVisibility(View.INVISIBLE);
-                        delBtn.setVisibility(View.INVISIBLE);
-                        focusRow = null;
-                        focusMaNV = null;
-                        focusTenNV = null;
-                        focusNSNV = null;
-                        focusPKNV = "";
-                        success = true;
+
+                            @Override
+                            public void onError(String error) {
+                                Toast.makeText(NhanvienLayout.this, "Loi!", Toast.LENGTH_SHORT).show();
+                                ErrorDialog();
+                            }
+
+                            @Override
+                            public void onSuccess(String response) {
+                                if(response.trim().equals("Success")){
+                                    Toast.makeText(NhanvienLayout.this, "Them thanh cong!", Toast.LENGTH_SHORT).show();
+                                    SuccesssDialog();
+                                    TableRow tr = createRow(NhanvienLayout.this, nv);
+                                    int n = nhanvien_table_list.getChildCount();
+                                    tr.setId(n);
+                                    if (!PK_spinner_mini_maPK.trim().equals(PK_spinner_maPK.trim())) {
+                                        // Nếu thằng bên trong là phòng kho nhưng bên ngoài là tất cả phòng kho thì
+                                        if (PK_spinner_maPK.trim().equals("All")) {
+                                            // cứ insert như bth
+                                            nhanvien_table_list.addView(tr);
+                                            setEventTableRows((TableRow) nhanvien_table_list.getChildAt(n), nhanvien_table_list);
+                                        }
+                                        // Nếu thằng bên trong là phòng ban nhưng bên ngoài là phòng ban khác thì khỏi thêm table
+                                        // Nếu trùng
+                                    } else {
+                                        nhanvien_table_list.addView(tr);
+                                        setEventTableRows((TableRow) nhanvien_table_list.getChildAt(n), nhanvien_table_list);
+                                    }
+                                    nhanvienlist.add(nv);
+                                    editBtn.setVisibility(View.INVISIBLE);
+                                    delBtn.setVisibility(View.INVISIBLE);
+                                    focusRow = null;
+                                    focusMaNV = null;
+                                    focusTenNV = null;
+                                    focusNSNV = null;
+                                    focusPKNV = "";
+                                }else {
+                                    Toast.makeText(NhanvienLayout.this,"That bai!", Toast.LENGTH_SHORT).show();
+                                    ErrorDialog();
+                                }
+                            }
+                        });
                     }
                     break;
                     case R.id.NV_editBtn: {
@@ -629,53 +672,67 @@ public class NhanvienLayout extends AppCompatActivity {
                                 id.getText().toString().trim()
                                 , inputTenNV.getText().toString().trim()
                                 , strDate
-                                , PK_spinner_mini_maPK);
-//                        Log.d("process",PB_spinner_mini_maPB.trim()+"");
-//                        Log.d("process",PB_spinner_maPB.trim()+"");
-//                        Log.d("process",strDate.trim()+"");
-//                        Log.d("process",nv.toString());
-//                        if (nhanvienDB.update(nv) == -1) break;
-//                        Log.d("process","2True");
-                        //   Cập nhật nhân viên list bằng cách lấy cái index ra và add vào cái index đó
-                        int index = 0;
-                        for (int i = 0; i < nhanvienlist.size(); i++) {
-                            if (nhanvienlist.get(i).getMaNv().equals(id.getText().toString().trim())) {
-                                index = i;
-                                break;
-                            }
-                        }
-                        Log.d("process", index + "");
-                        nhanvienlist.set(index, nv);
-                        boolean edit = false, changePB = false;
-                        if (!PK_spinner_mini_maPK.trim().equals(PK_spinner_maPK.trim())) {
-                            // Khi không cần biết thay đổi PB như thế nào nhưng bên ngoài là All thì cứ edit thôi
-                            if (PK_spinner_maPK.trim().equals("All"))
-                                edit = true;
-                                // Vậy trường hợp đang là Phòng giám đốc muốn thay Phòng kỹ thuật thì
-                            else {
-                                changePB = true;
-                            }
-                        } else {
-                            // Khi giữ nguyên phòng ban
-                            edit = true;
-                        }
+                                , PK_spinner_mini_maPK,inputMailNV.getText().toString().trim() + "");
+                        nhanvienDB.CapNhatNhanVien(nv, NhanvienLayout.this, new NhanVienDB.VolleyCallBack() {
+                            @Override
+                            public void onSuccess() {
 
-                        if (edit) {
-                            name.setText(nv.getHoTen() + "");
-                            date.setText(formatDate(strDate, false));
-                            tr.setTag(nv.getMaPk());
-                        }
-                        if (changePB) {
-                            if (indexofRow == nhanvien_table_list.getChildCount() - 1) {
-                                nhanvien_table_list.removeViewAt(indexofRow);
-                            } else {
-                                nhanvien_table_list.removeViewAt(indexofRow);
-                                for (int i = 0; i < nhanvien_table_list.getChildCount(); i++) {
-                                    nhanvien_table_list.getChildAt(i).setId((int) i);
+                            }
+
+                            @Override
+                            public void onError(String error) {
+
+                            }
+
+                            @Override
+                            public void onSuccess(String response) {
+                                if(response.trim().equals("Success")){
+                                    Toast.makeText(NhanvienLayout.this, "Cap nhat thanh cong!", Toast.LENGTH_SHORT).show();
+                                    SuccesssDialog();
+                                    int index = 0;
+                                    for (int i = 0; i < nhanvienlist.size(); i++) {
+                                        if (nhanvienlist.get(i).getMaNv().equals(id.getText().toString().trim())) {
+                                            index = i;
+                                            break;
+                                        }
+                                    }
+                                    Log.d("process", index + "");
+                                    nhanvienlist.set(index, nv);
+                                    boolean edit = false, changePB = false;
+                                    if (!PK_spinner_mini_maPK.trim().equals(PK_spinner_maPK.trim())) {
+                                        // Khi không cần biết thay đổi PB như thế nào nhưng bên ngoài là All thì cứ edit thôi
+                                        if (PK_spinner_maPK.trim().equals("All"))
+                                            edit = true;
+                                            // Vậy trường hợp đang là Phòng giám đốc muốn thay Phòng kỹ thuật thì
+                                        else {
+                                            changePB = true;
+                                        }
+                                    } else {
+                                        // Khi giữ nguyên phòng ban
+                                        edit = true;
+                                    }
+
+                                    if (edit) {
+                                        name.setText(nv.getHoTen() + "");
+                                        date.setText(formatDate(strDate, false));
+                                        tr.setTag(nv.getMaPk());
+                                    }
+                                    if (changePB) {
+                                        if (indexofRow == nhanvien_table_list.getChildCount() - 1) {
+                                            nhanvien_table_list.removeViewAt(indexofRow);
+                                        } else {
+                                            nhanvien_table_list.removeViewAt(indexofRow);
+                                            for (int i = 0; i < nhanvien_table_list.getChildCount(); i++) {
+                                                nhanvien_table_list.getChildAt(i).setId((int) i);
+                                            }
+                                        }
+                                    }
+                                }else {
+                                    Toast.makeText(NhanvienLayout.this,"That bai!", Toast.LENGTH_SHORT).show();
+                                    ErrorDialog();
                                 }
                             }
-                        }
-                        success = true;
+                        });
                     }
                     break;
                     case R.id.NV_delBtn: {
@@ -684,58 +741,55 @@ public class NhanvienLayout extends AppCompatActivity {
                                 focusTenNV.getText().toString().trim(),
                                 formatDate(focusNSNV.getText().toString().trim(), true),
                                 focusPKNV.trim());
-                        boolean del = false;
-//                        if (nhanvienDB.delete(nv) == -1) break;
-//                        Log.d("process","1True");
-//                        Log.d("process",nv.toString());
-                        if (indexofRow == nhanvien_table_list.getChildCount() - 1) {
-                            nhanvien_table_list.removeViewAt(indexofRow);
-                        } else {
-                            nhanvien_table_list.removeViewAt(indexofRow);
-                            for (int i = 0; i < nhanvien_table_list.getChildCount(); i++) {
-                                nhanvien_table_list.getChildAt(i).setId((int) i);
+                        nhanvienDB.XoaNhanVien(nv, NhanvienLayout.this, new NhanVienDB.VolleyCallBack() {
+                            @Override
+                            public void onSuccess() {
+
                             }
-                        }
-                        int index = 0;
-                        for (int i = 0; i < nhanvienlist.size(); i++) {
-                            if (nhanvienlist.get(i).getMaNv().equals(focusMaNV.getText().toString().trim())) {
-                                index = i;
-                                break;
+
+                            @Override
+                            public void onError(String error) {
+
                             }
-                        }
-                        nhanvienlist.remove(index);
-//                        Log.d("process",index+"");
-//                        Log.d("process",nhanvienlist.size()+"");
-                        editBtn.setVisibility(View.INVISIBLE);
-                        delBtn.setVisibility(View.INVISIBLE);
-                        focusRow = null;
-                        focusMaNV = null;
-                        focusTenNV = null;
-                        focusNSNV = null;
-                        focusPKNV = "";
-                        success = true;
+
+                            @Override
+                            public void onSuccess(String response) {
+                                if(response.trim().equals("Success")){
+                                    Toast.makeText(NhanvienLayout.this, "Xoa thanh cong!", Toast.LENGTH_SHORT).show();
+                                    SuccesssDialog();
+                                if (indexofRow == nhanvien_table_list.getChildCount() - 1) {
+                                    nhanvien_table_list.removeViewAt(indexofRow);
+                                } else {
+                                    nhanvien_table_list.removeViewAt(indexofRow);
+                                    for (int i = 0; i < nhanvien_table_list.getChildCount(); i++) {
+                                        nhanvien_table_list.getChildAt(i).setId((int) i);
+                                    }
+                                }
+                                int index = 0;
+                                for (int i = 0; i < nhanvienlist.size(); i++) {
+                                    if (nhanvienlist.get(i).getMaNv().equals(focusMaNV.getText().toString().trim())) {
+                                        index = i;
+                                        break;
+                                    }
+                                }
+                                nhanvienlist.remove(index);
+                                editBtn.setVisibility(View.INVISIBLE);
+                                delBtn.setVisibility(View.INVISIBLE);
+                                focusRow = null;
+                                focusMaNV = null;
+                                focusTenNV = null;
+                                focusNSNV = null;
+                                focusPKNV = "";
+                                }else {
+                                    Toast.makeText(NhanvienLayout.this,"That bai!", Toast.LENGTH_SHORT).show();
+                                    ErrorDialog();
+                                }
+                            }
+                        });
                     }
                     break;
                     default:
                         break;
-                }
-                if (success) {
-                    showResult.setText(showLabel.getText() + " thành công !");
-                    showResult.setTextColor(getResources().getColor(R.color.yes_color));
-                    showResult.setVisibility(View.VISIBLE);
-                    new Handler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            inputMaNV.setText("");
-                            inputTenNV.setText("");
-                            showResult.setVisibility(View.INVISIBLE);
-                            nhanviendialog.dismiss();
-                        }
-                    }, 1000);
-                } else {
-                    showResult.setTextColor(getResources().getColor(R.color.thoatbtn_bgcolor));
-                    showResult.setText(showLabel.getText() + " thất bại !");
-                    showResult.setVisibility(View.VISIBLE);
                 }
             }
         });
@@ -786,7 +840,26 @@ public class NhanvienLayout extends AppCompatActivity {
         }
         return noError;
     }
-
+    public void SuccesssDialog(){
+        showResult.setText(showLabel.getText() + " thành công !");
+        showResult.setTextColor(getResources().getColor(R.color.yes_color));
+        showResult.setVisibility(View.VISIBLE);
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                inputMaNV.setText("");
+                inputTenNV.setText("");
+                inputMailNV.setText("");
+                showResult.setVisibility(View.INVISIBLE);
+                nhanviendialog.dismiss();
+            }
+        }, 1000);
+    }
+    public void ErrorDialog(){
+        showResult.setTextColor(getResources().getColor(R.color.thoatbtn_bgcolor));
+        showResult.setText(showLabel.getText() + " thất bại !");
+        showResult.setVisibility(View.VISIBLE);
+    }
     // --------------- CUSTOM HELPER -----------------------------------------------------------------
     public ArrayAdapter<String> loadSpinnerAdapter(ArrayList<String> phongkho) {
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, phongkho);

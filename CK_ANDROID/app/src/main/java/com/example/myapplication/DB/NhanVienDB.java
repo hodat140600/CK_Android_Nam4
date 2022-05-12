@@ -24,11 +24,11 @@ import java.util.Map;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-public class NhanVienDB extends AppCompatActivity {
-    public String urlGetData = "http://192.168.1.7:8080/androidwebservice/NhanvienDB/getdata.php";
-    public String urlInsert = "http://192.168.1.7:8080/androidwebservice/NhanvienDB/insert.php";
-    public String urlCapNhat = "http://192.168.1.7:8080/androidwebservice/NhanvienDB/update.php";
-    public String urlDelete = "http://192.168.1.7:8080/androidwebservice/NhanvienDBdelete.php";
+public class NhanVienDB extends Connect {
+    public String urlGetData = connect + "NhanvienDB/getdata.php";
+    public String urlInsert = connect + "NhanvienDB/insert.php";
+    public String urlCapNhat = connect + "NhanvienDB/update.php";
+    public String urlDelete = connect + "NhanvienDB/delete.php";
     public NhanVienDB(){
 
     }

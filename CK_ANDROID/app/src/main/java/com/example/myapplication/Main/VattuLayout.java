@@ -63,7 +63,8 @@ public class VattuLayout extends AppCompatActivity {
     Button navPK;
     Button navNV;
     Button navVT;
-    Button navCP;
+    Button navPN;
+    Button navCTPN;
 
     EditText search;
 
@@ -175,7 +176,8 @@ public class VattuLayout extends AppCompatActivity {
         navPK = findViewById(R.id.VT_navbar_phongkho);
         navNV = findViewById(R.id.VT_navbar_nhanvien);
         navVT = findViewById(R.id.VT_navbar_VT);
-        navCP = findViewById(R.id.VT_navbar_capphat);
+        navPN = findViewById(R.id.VT_navbar_phieunhap);
+        navCTPN = findViewById(R.id.VT_navbar_capphat);
 
         search = findViewById(R.id.VT_searchEdit);
 
@@ -251,14 +253,24 @@ public class VattuLayout extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 finish();
-                Intent intent = new Intent(VattuLayout.this, PhieuNhapLayout.class);
+                Intent intent = new Intent(VattuLayout.this, NhanvienLayout.class);
                 overridePendingTransition(R.anim.slide_from_left, R.anim.slide_to_right);
                 startActivity( intent );
 
             }
         });
+        navPN.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+                Intent intent = new Intent(VattuLayout.this, PhieuNhapLayout.class);
+                overridePendingTransition(R.anim.slide_from_right, R.anim.slide_to_left);
+                startActivity( intent );
+            }
+
+        });
         // navCP
-        navCP.setOnClickListener(new View.OnClickListener() {
+        navCTPN.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(VattuLayout.this, ChiTietPhieuNhapLayout.class);

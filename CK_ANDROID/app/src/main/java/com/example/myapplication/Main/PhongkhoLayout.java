@@ -41,7 +41,8 @@ public class PhongkhoLayout extends AppCompatActivity {
     Button navPK;
     Button navNV;
     Button navVT;
-    Button navCP;
+    Button navPN;
+    Button navCTPN;
 
     List<PhongKho> phongkholist;
 
@@ -155,9 +156,10 @@ public class PhongkhoLayout extends AppCompatActivity {
         PK_searchView = findViewById(R.id.PK_searchEdit);
 
         navPK = findViewById(R.id.PK_navbar_phongkho);
-        navNV = findViewById(R.id.PK_navbar_nhanvien);
+        navNV = findViewById(R.id.PK_navbar_nv);
         navVT = findViewById(R.id.PK_navbar_VT);
-        navCP= findViewById(R.id.PK_navbar_capphat);
+        navPN = findViewById(R.id.PK_navbar_pn);
+        navCTPN = findViewById(R.id.PK_navbar_capphat);
     }
 
     public void setEvent() {
@@ -171,7 +173,7 @@ public class PhongkhoLayout extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 finish();
-                Intent intent = new Intent(PhongkhoLayout.this, PhieuNhapLayout.class);
+                Intent intent = new Intent(PhongkhoLayout.this, NhanvienLayout.class);
                 overridePendingTransition(R.anim.slide_from_right, R.anim.slide_to_left);
                 startActivity( intent );
 
@@ -187,8 +189,18 @@ public class PhongkhoLayout extends AppCompatActivity {
 
             }
         });
+        navPN.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+                Intent intent = new Intent(PhongkhoLayout.this, PhieuNhapLayout.class);
+                overridePendingTransition(R.anim.slide_from_right, R.anim.slide_to_left);
+                startActivity( intent );
+
+            }
+        });
         // navCP
-        navCP.setOnClickListener(new View.OnClickListener() {
+        navCTPN.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(PhongkhoLayout.this, ChiTietPhieuNhapLayout.class);

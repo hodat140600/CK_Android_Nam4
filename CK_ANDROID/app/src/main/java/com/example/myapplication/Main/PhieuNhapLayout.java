@@ -51,9 +51,10 @@ public class PhieuNhapLayout extends AppCompatActivity {
 
     // Navigation
     Button navPK;
+    Button navNV;
     Button navPN;
     Button navVT;
-    Button navCP;
+    Button navCTPN;
 
     // Dialog Layout
     Dialog phieunhapdialog;
@@ -170,7 +171,8 @@ public class PhieuNhapLayout extends AppCompatActivity {
         navPK = findViewById(R.id.PN_navbar_phongkho);
         navPN = findViewById(R.id.PN_navbar_phieunhap);
         navVT = findViewById(R.id.PN_navbar_VT);
-        navCP = findViewById(R.id.PN_navbar_chitiet);
+        navNV = findViewById(R.id.PN_navbar_nhanvien);
+        navCTPN = findViewById(R.id.PN_navbar_chitiet);
     }
 
     public void loadDatabase() {
@@ -263,8 +265,19 @@ public class PhieuNhapLayout extends AppCompatActivity {
             }
 
         });
+        navNV.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+                Intent intent = new Intent(PhieuNhapLayout.this, NhanvienLayout.class);
+                overridePendingTransition(R.anim.slide_from_right, R.anim.slide_to_left);
+                startActivity(intent);
+
+            }
+
+        });
         // navCP
-        navCP.setOnClickListener(new View.OnClickListener() {
+        navCTPN.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(PhieuNhapLayout.this, ChiTietPhieuNhapLayout.class);

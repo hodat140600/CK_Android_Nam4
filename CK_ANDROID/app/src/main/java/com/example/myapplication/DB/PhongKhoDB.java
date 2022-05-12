@@ -29,11 +29,11 @@ import java.util.Map;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-public class PhongKhoDB extends AppCompatActivity {
-    public String urlGetData = "http://192.168.1.7:8080/androidwebservice/getdata.php";
-    public String urlInsert = "http://192.168.1.7:8080/androidwebservice/insert.php";
-    public String urlCapNhat = "http://192.168.1.7:8080/androidwebservice/update.php";
-    public String urlDelete = "http://192.168.1.7:8080/androidwebservice/delete.php";
+public class PhongKhoDB extends Connect{
+    public String urlGetData = connect + "PhongKhoDB/getdata.php";
+    public String urlInsert = connect + "PhongKhoDB/insert.php";
+    public String urlCapNhat = connect + "PhongKhoDB/update.php";
+    public String urlDelete = connect + "PhongKhoDB/delete.php";
     public PhongKhoDB(){
 
     }

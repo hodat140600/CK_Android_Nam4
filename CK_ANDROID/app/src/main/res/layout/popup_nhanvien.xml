@@ -126,6 +126,33 @@
                 android:orientation="vertical">
                 <TextView
                     style="@style/textBlack"
+                    android:text="Email"
+                    android:padding="10dp"
+                    />
+                <EditText
+                    android:id="@+id/NV_inputMailNV"
+                    android:paddingLeft="10dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    />
+                <TextView
+                    style="@style/textRed"
+                    android:id="@+id/NV_showMailNVError"
+                    android:layout_width="match_parent"
+                    android:text="@string/error_of_this_line"
+                    android:gravity="center"
+                    android:layout_marginTop="10dp"
+                    android:visibility="invisible"
+                    />
+            </LinearLayout>
+            <LinearLayout
+                android:layout_marginTop="10dp"
+                android:layout_marginHorizontal="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+                <TextView
+                    style="@style/textBlack"
                     android:text="@string/ngay_sinh"
                     android:padding="10dp"
                     />

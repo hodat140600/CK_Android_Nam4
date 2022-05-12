@@ -188,7 +188,7 @@
             <Button
                 style="@style/Btn"
                 android:id="@+id/NV_navbar_capphat"
-                android:text="@string/cap_phat_VT"
+                android:text="Chi tiết PN"
                 android:backgroundTint="@color/disable_color"
                 android:textColor="@color/black"
                 />
@@ -208,14 +208,14 @@
             android:id="@+id/NV_navbar_phongkho"
             android:backgroundTint="@color/disable_color"
             android:textColor="@color/black"
-            android:text="@string/phong_kho"/>
+            android:text="PK"/>
 
         <Button
             style="@style/Btn"
             android:id="@+id/NV_navbar_nhanvien"
             android:backgroundTint="@color/active_color"
             android:textColor="@color/black"
-            android:text="@string/nhan_vien"/>
+            android:text="NV"/>
 
         <Button
             style="@style/Btn"
@@ -223,6 +223,12 @@
             android:backgroundTint="@color/disable_color"
             android:textColor="@color/black"
             android:text="@string/vt"/>
+        <Button
+            style="@style/Btn"
+            android:id="@+id/NV_navbar_PN"
+            android:backgroundTint="@color/disable_color"
+            android:textColor="@color/black"
+            android:text="PN"/>
 
     </LinearLayout>
     <include
