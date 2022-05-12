@@ -4,10 +4,10 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.graphics.fonts.Font;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -18,17 +18,14 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.myapplication.Databases.ChiTietPhieuNhapDatabase;
-import com.example.myapplication.Databases.PhieuNhapDatabase;
-import com.example.myapplication.Databases.PhongKhoDatabase;
+import com.example.myapplication.DB.ChiTietPhieuNhapDB;
+import com.example.myapplication.DB.PhieuNhapDB;
+import com.example.myapplication.DB.PhongKhoDB;
 import com.example.myapplication.Entities.PhieuNhap;
 import com.example.myapplication.Entities.PhongKho;
 import com.example.myapplication.Entities.Rows;
 import com.example.myapplication.R;
-import com.example.myapplication.XinChoLayout;
-import com.itextpdf.barcodes.BarcodeCodabar;
 import com.itextpdf.barcodes.BarcodeQRCode;
-import com.itextpdf.io.font.FontConstants;
 import com.itextpdf.io.font.PdfEncodings;
 import com.itextpdf.io.image.ImageData;
 import com.itextpdf.io.image.ImageDataFactory;
@@ -76,17 +73,17 @@ public class BaoCaoLayout extends AppCompatActivity {
             totalMoneyView;
 
     // ChitietPhieuNhap
-    ChiTietPhieuNhapDatabase chiTietPhieuNhapDatabase;
+    ChiTietPhieuNhapDB chiTietPhieuNhapDB;
 
     // PhieuNhap
-    PhieuNhapDatabase phieuNhapDatabase;
-    List<PhieuNhap> phieuNhapList;
-    ArrayList<String> phieunhapStringList;
+    PhieuNhapDB phieuNhapDB;
+    ArrayList<PhieuNhap> phieuNhapArrayList;
+    ArrayList<String> phieunhapList;
     PhieuNhap selectedPhieuNhap;
 
     // PhongKho
-    PhongKhoDatabase phongKhoDatabase;
-    List<PhongKho> phongKhoList;
+    PhongKhoDB phongKhoDB;
+    ArrayList<PhongKho> phongKhoList;
     ArrayList<String> tenPhongKhoList;
     PhongKho selectedPhongKho;
 
@@ -125,15 +122,31 @@ public class BaoCaoLayout extends AppCompatActivity {
     }
 
     private void loadDatabase() {
-        phieuNhapDatabase = new PhieuNhapDatabase(this);
-        phongKhoDatabase = new PhongKhoDatabase(this);
-        chiTietPhieuNhapDatabase = new ChiTietPhieuNhapDatabase( this);
-        phongKhoList = phongKhoDatabase.select();
-        tenPhongKhoList = new ArrayList<>();
-        for( PhongKho phongKho : phongKhoList){
-            tenPhongKhoList.add(phongKho.getTenpk().trim());
-        }
-        PKSpinner.setAdapter( loadSpinnerAdapter(tenPhongKhoList) );
+        phongKhoList = new ArrayList<>();
+        phieuNhapDB = new PhieuNhapDB();
+        phongKhoDB = new PhongKhoDB();
+        chiTietPhieuNhapDB = new ChiTietPhieuNhapDB();
+        phongKhoDB.GetData(phongKhoList, this, new PhongKhoDB.VolleyCallBack() {
+            @Override
+            public void onSuccess() {
+                tenPhongKhoList = new ArrayList<>();
+                for( PhongKho phongKho : phongKhoList){
+                    tenPhongKhoList.add(phongKho.getTenpk().trim());
+                }
+                PKSpinner.setAdapter( loadSpinnerAdapter(tenPhongKhoList) );
+            }
+
+            @Override
+            public void onError(String error) {
+
+            }
+
+            @Override
+            public void onSuccess(String response) {
+
+            }
+        });
+
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -187,19 +200,47 @@ public class BaoCaoLayout extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 selectedPhongKho = phongKhoList.get(position);
-                phieuNhapList = phieuNhapDatabase.select(selectedPhongKho);
+                phieuNhapArrayList = new ArrayList<>();
+                phieuNhapDB.GetDataPK(phieuNhapArrayList, BaoCaoLayout.this, new PhieuNhapDB.VolleyCallBack() {
+                    @Override
+                    public void onSuccess() {
+                        PNtoStringArray(phieuNhapArrayList);
+                        setNVSpinnerEvent();
+                    }
 
-                PNtoStringArray(phieuNhapList);
-                setNVSpinnerEvent();
+                    @Override
+                    public void onError(String error) {
+
+                    }
+
+                    @Override
+                    public void onSuccess(String response) {
+
+                    }
+                }, selectedPhongKho.getMapk().trim());
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
                 selectedPhongKho = phongKhoList.get(0);
-                phieuNhapList = phieuNhapDatabase.select(selectedPhongKho);
-                PNtoStringArray(phieuNhapList);
-                setNVSpinnerEvent();
+                phieuNhapArrayList = new ArrayList<>();
+                phieuNhapDB.GetDataPK(phieuNhapArrayList, BaoCaoLayout.this, new PhieuNhapDB.VolleyCallBack() {
+                    @Override
+                    public void onSuccess() {
+                        PNtoStringArray(phieuNhapArrayList);
+                        setNVSpinnerEvent();
+                    }
 
+                    @Override
+                    public void onError(String error) {
+
+                    }
+
+                    @Override
+                    public void onSuccess(String response) {
+
+                    }
+                }, selectedPhongKho.getMapk().trim());
             }
         });
 
@@ -209,17 +250,35 @@ public class BaoCaoLayout extends AppCompatActivity {
     }
     public void setTable( String pn, String pk){
 //        <!-- 40 / 100 / 100 / 80 / 80 -->
+        List<String> list = new ArrayList<>();
         table.removeViews(1, table.getChildCount()-1);
         int[] sizeOfCell = {50,100,110,80,100};
         boolean[] isPaddingZero = {false, false, true, false, true};
         rowGenerator.setSizeOfCell(sizeOfCell);
         rowGenerator.setIsCellPaddingZero(isPaddingZero);
-        rowGenerator.setData( rowGenerator.enhanceRowData( chiTietPhieuNhapDatabase.selectVT_IndexPKForBC( pk,pn ), 5 ) );
-        rows = rowGenerator.generateArrayofRows();
-        if( rows == null ) return;
-        for( TableRow row : rows ){
-            table.addView(row);
-        }
+        chiTietPhieuNhapDB.GetDataIndexBC(list, BaoCaoLayout.this, new ChiTietPhieuNhapDB.VolleyCallBack() {
+            @Override
+            public void onSuccess() {
+                rowGenerator.setData( rowGenerator.enhanceRowData( list, 5 ) );
+                rows = rowGenerator.generateArrayofRows();
+                if( rows == null ) return;
+                for( TableRow row : rows ){
+                    table.addView(row);
+                }
+                setTotalMoneyView((ArrayList<TableRow>) rows);
+            }
+
+            @Override
+            public void onError(String error) {
+
+            }
+
+            @Override
+            public void onSuccess(String response) {
+
+            }
+        },pk, pn);
+
 
     }
 
@@ -242,7 +301,7 @@ public class BaoCaoLayout extends AppCompatActivity {
         PNSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                selectedPhieuNhap = phieuNhapList.get(position);
+                selectedPhieuNhap = phieuNhapArrayList.get(position);
                 String datapk = selectedPhongKho.getMapk().trim();
                 String datapn = selectedPhieuNhap.getSoPhieu().trim();
                 setTable(datapn, datapk);
@@ -251,7 +310,7 @@ public class BaoCaoLayout extends AppCompatActivity {
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-                selectedPhieuNhap = phieuNhapList.get(0);
+                selectedPhieuNhap = phieuNhapArrayList.get(0);
                 String datapk = selectedPhongKho.getMapk().trim();
                 String datapn = selectedPhieuNhap.getSoPhieu().trim();
                 setTable(datapn, datapk);
@@ -260,12 +319,13 @@ public class BaoCaoLayout extends AppCompatActivity {
         });
     }
 
-    public void PNtoStringArray(List<PhieuNhap> list ){
-        phieunhapStringList = new ArrayList<>();
+    public void PNtoStringArray(ArrayList<PhieuNhap> list ){
+        phieunhapList = new ArrayList<>();
         for( PhieuNhap phieuNhap : list){
-            phieunhapStringList.add( phieuNhap.toSpinnerString() );
+            phieunhapList.add( phieuNhap.toSpinnerString() );
         }
-        PNSpinner.setAdapter( loadSpinnerAdapter(phieunhapStringList) );
+        Log.d("PN", "array! \n" + phieunhapList.toString());
+        PNSpinner.setAdapter( loadSpinnerAdapter(phieunhapList) );
     }
 
     public ArrayAdapter<String> loadSpinnerAdapter(ArrayList<String> str) {

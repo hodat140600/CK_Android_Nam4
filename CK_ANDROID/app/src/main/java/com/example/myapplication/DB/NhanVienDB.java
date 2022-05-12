@@ -1,11 +1,6 @@
 package com.example.myapplication.DB;
 
-
-
 import android.content.Context;
-import android.util.Log;
-import android.widget.TableRow;
-import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
@@ -15,8 +10,8 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.myapplication.Entities.NhanVien;
 import com.example.myapplication.Entities.PhongKho;
-import com.example.myapplication.Main.PhongkhoLayout;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -29,25 +24,26 @@ import java.util.Map;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-public class PhongKhoDB extends AppCompatActivity {
-    public String urlGetData = "http://192.168.1.7:8080/androidwebservice/getdata.php";
-    public String urlInsert = "http://192.168.1.7:8080/androidwebservice/insert.php";
-    public String urlCapNhat = "http://192.168.1.7:8080/androidwebservice/update.php";
-    public String urlDelete = "http://192.168.1.7:8080/androidwebservice/delete.php";
-    public PhongKhoDB(){
+public class NhanVienDB extends AppCompatActivity {
+    public String urlGetData = "http://192.168.1.7:8080/androidwebservice/NhanvienDB/getdata.php";
+    public String urlInsert = "http://192.168.1.7:8080/androidwebservice/NhanvienDB/insert.php";
+    public String urlCapNhat = "http://192.168.1.7:8080/androidwebservice/NhanvienDB/update.php";
+    public String urlDelete = "http://192.168.1.7:8080/androidwebservice/NhanvienDBdelete.php";
+    public NhanVienDB(){
 
     }
-    public void GetData(ArrayList<PhongKho> phongKhoArrayList, Context context,final VolleyCallBack callBack){
+    public void GetData(ArrayList<NhanVien> nhanVienArrayList, Context context, final VolleyCallBack callBack){
         RequestQueue mRequestQueue = Volley.newRequestQueue(context);
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, urlGetData, null, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
-                phongKhoArrayList.clear();
+                nhanVienArrayList.clear();
                 for (int i = 0; i < response.length(); i++){
                     try {
                         JSONObject jsonObject = response.getJSONObject(i);
-                        phongKhoArrayList.add(new PhongKho(jsonObject.getString("MaPK"),
-                                jsonObject.getString("TenPK"), jsonObject.getString("DiaChi"),jsonObject.getString("SDT")));
+                        nhanVienArrayList.add(new NhanVien(jsonObject.getString("MaNV"),
+                                jsonObject.getString("TenNV"), jsonObject.getString("NgaySinh"),jsonObject.getString("MaPK"),
+                                jsonObject.getString("Email")));
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -64,7 +60,7 @@ public class PhongKhoDB extends AppCompatActivity {
         );
         mRequestQueue.add(jsonArrayRequest);
     }
-    public void ThemPhongKho(PhongKho phongKho, Context context,final VolleyCallBack callBack){
+    public void ThemNhanVien(NhanVien nhanVien, Context context,final VolleyCallBack callBack){
         RequestQueue mRequestQueue = Volley.newRequestQueue(context);
         StringRequest stringRequest = new StringRequest(Request.Method.POST, urlInsert, new Response.Listener<String>() {
             @Override
@@ -83,10 +79,11 @@ public class PhongKhoDB extends AppCompatActivity {
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> params = new HashMap<>();
-                params.put("mapk",phongKho.getMapk());
-                params.put("tenpk",phongKho.getTenpk());
-                params.put("diachi",phongKho.getDiachi());
-                params.put("sdt",phongKho.getSdt());
+                params.put("manv",nhanVien.getMaNv());
+                params.put("mapk",nhanVien.getMaPk());
+                params.put("tennv",nhanVien.getHoTen());
+                params.put("ngaysinh",nhanVien.getNgaySinh());
+                params.put("email",nhanVien.getEmail());
 
                 return params;
             }
@@ -94,7 +91,7 @@ public class PhongKhoDB extends AppCompatActivity {
         mRequestQueue.add(stringRequest);
 
     }
-    public void CapNhatPhongKho(PhongKho phongKho, Context context,final VolleyCallBack callBack){
+    public void CapNhatNhanVien(NhanVien nhanVien, Context context,final VolleyCallBack callBack){
         RequestQueue requestQueue = Volley.newRequestQueue(context);
         StringRequest stringRequest = new StringRequest(Request.Method.POST, urlCapNhat, new Response.Listener<String>() {
             @Override
@@ -111,16 +108,17 @@ public class PhongKhoDB extends AppCompatActivity {
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> params = new HashMap<>();
-                params.put("mapk",phongKho.getMapk());
-                params.put("tenpk",phongKho.getTenpk());
-                params.put("diachi",phongKho.getDiachi());
-                params.put("sdt",phongKho.getSdt());
+                params.put("manv",nhanVien.getMaNv());
+                params.put("mapk",nhanVien.getMaPk());
+                params.put("tennv",nhanVien.getHoTen());
+                params.put("ngaysinh",nhanVien.getNgaySinh());
+                params.put("email",nhanVien.getEmail());
                 return params;
             }
         };
         requestQueue.add(stringRequest);
     }
-    public void XoaPhongKho(PhongKho phongKho, Context context,final VolleyCallBack callBack){
+    public void XoaNhanVien(NhanVien nhanVien, Context context,final VolleyCallBack callBack){
         RequestQueue requestQueue = Volley.newRequestQueue(context);
         StringRequest stringRequest = new StringRequest(Request.Method.POST, urlDelete, new Response.Listener<String>() {
             @Override
@@ -138,7 +136,7 @@ public class PhongKhoDB extends AppCompatActivity {
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> params = new HashMap<>();
-                params.put("mapk",phongKho.getMapk().trim());
+                params.put("manv",nhanVien.getMaNv());
                 return params;
             }
         };

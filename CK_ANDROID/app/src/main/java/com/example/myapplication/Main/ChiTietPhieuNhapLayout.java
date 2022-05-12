@@ -15,8 +15,6 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -30,10 +28,11 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.myapplication.Databases.ChiTietPhieuNhapDatabase;
-import com.example.myapplication.Databases.PhieuNhapDatabase;
-import com.example.myapplication.Databases.PhongKhoDatabase;
-import com.example.myapplication.Databases.VatTuDatabase;
+import com.android.volley.AuthFailureError;
+import com.example.myapplication.DB.ChiTietPhieuNhapDB;
+import com.example.myapplication.DB.PhieuNhapDB;
+import com.example.myapplication.DB.PhongKhoDB;
+import com.example.myapplication.DB.VatTuDB;
 import com.example.myapplication.Entities.ChiTietPhieuNhap;
 import com.example.myapplication.Entities.PhieuNhap;
 import com.example.myapplication.Entities.PhongKho;
@@ -43,15 +42,13 @@ import com.example.myapplication.R;
 import com.example.myapplication.Statistics.BaoCaoLayout;
 import com.example.myapplication.Statistics.ThongKeLayout;
 
+import org.json.JSONException;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
-import androidx.core.view.WindowInsetsControllerCompat;
 
 public class ChiTietPhieuNhapLayout extends AppCompatActivity {
     public static PhongKho selectedPK = null;
@@ -111,15 +108,15 @@ public class ChiTietPhieuNhapLayout extends AppCompatActivity {
     Button navTK;
 
     // Data
-    PhieuNhapDatabase phieunhapDB;
-    ChiTietPhieuNhapDatabase chitietpnDB;
-    VatTuDatabase vattuDB;
-    PhongKhoDatabase phongkhoDB;
+    PhieuNhapDB phieunhapDB;
+    ChiTietPhieuNhapDB chitietpnDB;
+    VatTuDB vattuDB;
+    PhongKhoDB phongkhoDB;
 
-    List<PhieuNhap> phieunhap_list;
-    List<ChiTietPhieuNhap> chitietpn_list;
-    List<VatTu> vattu_list;
-    List<PhongKho> phongkho_list;
+    ArrayList<PhieuNhap> phieuNhapArrayList;
+    ArrayList<ChiTietPhieuNhap> chiTietPhieuNhapArrayList;
+    ArrayList<VatTu> vatTuArrayList;
+    ArrayList<PhongKho> phongKhoArrayList;
 
     int totalPrice = 0;
     int VTCount = 0;
@@ -149,6 +146,9 @@ public class ChiTietPhieuNhapLayout extends AppCompatActivity {
     // Other
     float scale;
     int indexofRow;
+    List<String> listAll;
+    List<String> listIndex;
+    List<String> listPnIndexPK;
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
@@ -178,7 +178,13 @@ public class ChiTietPhieuNhapLayout extends AppCompatActivity {
             public void afterTextChanged(Editable s) {
                 if(dataMaPKSpinner.equalsIgnoreCase("All"))
                     filterALL(s.toString());
-                else if(!dataMaPKSpinner.equalsIgnoreCase("All"))filterIndex(s.toString(), dataMaPKSpinner);
+                else if(!dataMaPKSpinner.equalsIgnoreCase("All")) {
+                    try {
+                        filterIndex(s.toString(), dataMaPKSpinner);
+                    } catch (JSONException | AuthFailureError e) {
+                        e.printStackTrace();
+                    }
+                }
                 editBtn.setVisibility(View.INVISIBLE);
                 delBtn.setVisibility(View.INVISIBLE);
                 previewVTBtn.setVisibility(View.INVISIBLE);
@@ -196,7 +202,7 @@ public class ChiTietPhieuNhapLayout extends AppCompatActivity {
         boolean[] isPaddingZero = {true, false, true, true, true};
         // Create List<TableRow> for TableList
         // TABLE CP INDEX 01 ----------------------------------------------------------------------------------------
-        rowGenarator.setData(rowGenarator.enhanceRowData(chitietpnDB.select_PN_CTPN_VT(), 5));
+        rowGenarator.setData(rowGenarator.enhanceRowData(listAll, 5));
         rowGenarator.setSizeOfCell(sizeOfCell);
         rowGenarator.setIsCellPaddingZero(isPaddingZero);
         List<TableRow> rows = rowGenarator.generateArrayofRows();
@@ -218,7 +224,7 @@ public class ChiTietPhieuNhapLayout extends AppCompatActivity {
         }
     }
 
-    private void filterIndex(String toString, String maPK) {
+    private void filterIndex(String toString, String maPK) throws JSONException, AuthFailureError {
         Rows rowGenarator = new Rows(this);
         TableLayout cp_table1 = cp_tablesindex_container.findViewById(R.id.CP_tableVT);
         cp_table1.removeViews(1, cp_table1.getChildCount() - 1);
@@ -228,56 +234,85 @@ public class ChiTietPhieuNhapLayout extends AppCompatActivity {
         cp_table2.removeViews(1, cp_table2.getChildCount() - 1);
         int[] sizeOfCell2 = {90, 240};
         boolean[] isPaddingZero2 = {false, false};
-        // Create List<TableRow> for TableList
-        // TABLE CP INDEX 01 ----------------------------------------------------------------------------------------
-        rowGenarator.setData(rowGenarator.enhanceRowData(chitietpnDB.selectVT_IndexPK(maPK), 4));
-        rowGenarator.setSizeOfCell(sizeOfCell);
-        rowGenarator.setIsCellPaddingZero(isPaddingZero);
-        List<TableRow> rows = rowGenarator.generateArrayofRows();
-        for (TableRow row : rows) {
+        chitietpnDB.GetDataIndex(listIndex, this, new ChiTietPhieuNhapDB.VolleyCallBack() {
+            @Override
+            public void onSuccess() {
+                rowGenarator.setData(rowGenarator.enhanceRowData(listIndex, 4));
+                rowGenarator.setSizeOfCell(sizeOfCell);
+                rowGenarator.setIsCellPaddingZero(isPaddingZero);
+                List<TableRow> rows = rowGenarator.generateArrayofRows();
+                for (TableRow row : rows) {
 
-            TextView mavt = (TextView) row.getChildAt(0);
-            String mavttxt = mavt.getText().toString();
-            TextView tenvt = (TextView) row.getChildAt(1);
-            String tenvttxt = tenvt.getText().toString();
-            if (mavttxt.toLowerCase().contains(toString.toLowerCase())
-                    || tenvttxt.toLowerCase().contains(toString.toLowerCase())) {
+                    TextView mavt = (TextView) row.getChildAt(0);
+                    String mavttxt = mavt.getText().toString();
+                    TextView tenvt = (TextView) row.getChildAt(1);
+                    String tenvttxt = tenvt.getText().toString();
+                    if (mavttxt.toLowerCase().contains(toString.toLowerCase())
+                            || tenvttxt.toLowerCase().contains(toString.toLowerCase())) {
 
-                cp_table1.addView(row);
-            }
-        }
-        for (int i = 1; i < cp_table1.getChildCount(); i++) {
-            TableRow row = (TableRow) cp_table1.getChildAt(i);
-
-            // Từ thằng VT được bấm gen ra thằng nhân viên đã mượn nó
-            row.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    int dem = v.getId();
-                    // TABLE CP INDEX 02 ----------------------------------------------------------------------------------------
-                    // Set text for noteVTLabel -------------------------------------------------------------------------
-                    TextView tenVTView = (TextView) row.getChildAt(1);
-                    noteVTLabel.setVisibility(View.VISIBLE);
-                    noteVTLabel.setText(tenVTView.getText().toString().trim() + " được nhập kho bởi phiếu nhập dưới đây");
-                    // ----------------------------------------------------------------------------------------------------
-                    TextView maVTView = (TextView) row.getChildAt(0);
-                    for (TableRow row : rows) {
-                        row.setBackgroundColor(getResources().getColor(R.color.white));
-                    }
-                    row.setBackgroundColor(getResources().getColor(R.color.selectedColor));
-                    rowGenarator.setData(rowGenarator.enhanceRowData(
-                            chitietpnDB.selectSP_IndexPK(
-                                    maPK,
-                                    maVTView.getText().toString().trim()
-                            ), 2));
-                    cp_table2.removeViews(1, cp_table2.getChildCount() - 1);
-                    List<TableRow> rows2 = rowGenarator.generateArrayofRows();
-                    for (TableRow row2 : rows2) {
-                        cp_table2.addView(row2);
+                        cp_table1.addView(row);
                     }
                 }
-            });
-        }
+                for (int i = 1; i < cp_table1.getChildCount(); i++) {
+                    TableRow row = (TableRow) cp_table1.getChildAt(i);
+
+                    // Từ thằng VT được bấm gen ra thằng nhân viên đã mượn nó
+                    row.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            int dem = v.getId();
+                            // TABLE CP INDEX 02 ----------------------------------------------------------------------------------------
+                            // Set text for noteVTLabel -------------------------------------------------------------------------
+                            TextView tenVTView = (TextView) row.getChildAt(1);
+                            noteVTLabel.setVisibility(View.VISIBLE);
+                            noteVTLabel.setText(tenVTView.getText().toString().trim() + " được nhập kho bởi phiếu nhập dưới đây");
+                            // ----------------------------------------------------------------------------------------------------
+                            TextView maVTView = (TextView) row.getChildAt(0);
+                            for (TableRow row : rows) {
+                                row.setBackgroundColor(getResources().getColor(R.color.white));
+                            }
+                            row.setBackgroundColor(getResources().getColor(R.color.selectedColor));
+                            chitietpnDB.GetDataPnIndexPK(listPnIndexPK, ChiTietPhieuNhapLayout.this, new ChiTietPhieuNhapDB.VolleyCallBack() {
+                                @Override
+                                public void onSuccess() {
+                                    rowGenarator.setData(rowGenarator.enhanceRowData(
+                                            listPnIndexPK, 2));
+                                    cp_table2.removeViews(1, cp_table2.getChildCount() - 1);
+                                    List<TableRow> rows2 = rowGenarator.generateArrayofRows();
+                                    for (TableRow row2 : rows2) {
+                                        cp_table2.addView(row2);
+                                    }
+                                }
+
+                                @Override
+                                public void onError(String error) {
+
+                                }
+
+                                @Override
+                                public void onSuccess(String response) {
+
+                                }
+                            }, maPK, maVTView.getText().toString().trim());
+
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onError(String error) {
+
+            }
+
+            @Override
+            public void onSuccess(String response) {
+
+            }
+        }, maPK);
+        // Create List<TableRow> for TableList
+        // TABLE CP INDEX 01 ----------------------------------------------------------------------------------------
+
     }
     // --------------- MAIN HELPER -----------------------------------------------------------------
     public void setControl() {
@@ -309,26 +344,92 @@ public class ChiTietPhieuNhapLayout extends AppCompatActivity {
     public void loadDatabase() {
         //   Log.d("process", "loadDatabase");
         // 1.  Load Spinner ra trước
-        PKSpinner.setAdapter(loadPBSpinner());
+        phongkhoDB = new PhongKhoDB();
+        phongKhoArrayList = new ArrayList<>();
+        listAll = new ArrayList<>();
+        listIndex = new ArrayList<>();
+        listPnIndexPK = new ArrayList<>();
+        phongkhoDB.GetData(phongKhoArrayList, this, new PhongKhoDB.VolleyCallBack() {
+            @Override
+            public void onSuccess() {
+                PKSpinner.setAdapter(loadPBSpinner());
+            }
 
-        phieunhapDB = new PhieuNhapDatabase(ChiTietPhieuNhapLayout.this);
-        phieunhap_list = phieunhapDB.select();
-        chitietpnDB = new ChiTietPhieuNhapDatabase(ChiTietPhieuNhapLayout.this);
-        chitietpn_list = chitietpnDB.select();
-        for (int i = 0; i < phieunhap_list.size(); i++) {
+            @Override
+            public void onError(String error) {
 
-            PhieuNhap phieunhap = phieunhap_list.get(i);
-            TableRow tr = createRow(ChiTietPhieuNhapLayout.this, phieunhap);
-            tr.setId(i + 1);
-            cp_tablepn_list.addView(tr);
-//            Log.d("data",nv.toString()+"");
-        }
-        vattuDB = new VatTuDatabase(ChiTietPhieuNhapLayout.this);
-        vattu_list = vattuDB.select();
-        table();
+            }
+
+            @Override
+            public void onSuccess(String response) {
+
+            }
+        });
+
+
+        phieunhapDB = new PhieuNhapDB();
+        phieuNhapArrayList = new ArrayList<>();
+        chitietpnDB = new ChiTietPhieuNhapDB();
+        chiTietPhieuNhapArrayList = new ArrayList<>();
+        vattuDB = new VatTuDB();
+        vatTuArrayList = new ArrayList<>();
+        phieunhapDB.GetData(phieuNhapArrayList, this, new PhieuNhapDB.VolleyCallBack() {
+            @Override
+            public void onSuccess() {
+                for (int i = 0; i < phieuNhapArrayList.size(); i++) {
+                    PhieuNhap phieunhap = phieuNhapArrayList.get(i);
+                    TableRow tr = createRow(ChiTietPhieuNhapLayout.this, phieunhap);
+                    tr.setId(i + 1);
+                    cp_tablepn_list.addView(tr);
+                }
+            }
+
+            @Override
+            public void onError(String error) {
+
+            }
+
+            @Override
+            public void onSuccess(String response) {
+
+            }
+        });
+        chitietpnDB.GetDataALL(listAll, this, new ChiTietPhieuNhapDB.VolleyCallBack() {
+            @Override
+            public void onSuccess() {
+                table(listAll);
+            }
+
+            @Override
+            public void onError(String error) {
+
+            }
+
+            @Override
+            public void onSuccess(String response) {
+
+            }
+        });
+        vattuDB.GetData(vatTuArrayList, this, new VatTuDB.VolleyCallBack() {
+            @Override
+            public void onSuccess() {
+
+            }
+
+            @Override
+            public void onError(String error) {
+
+            }
+
+            @Override
+            public void onSuccess(String response) {
+
+            }
+        });
+
     }
 
-    public void table() {
+    public void table(List<String> list) {
         Rows rowGenarator = new Rows(this);
         TableLayout pn_table1 = cp_tablectpn_list;
         pn_table1.removeViews(1, pn_table1.getChildCount() - 1);
@@ -336,7 +437,7 @@ public class ChiTietPhieuNhapLayout extends AppCompatActivity {
         boolean[] isPaddingZero = {true, false, true, true, true};
         // Create List<TableRow> for TableList
         // TABLE CP INDEX 01 ----------------------------------------------------------------------------------------
-        rowGenarator.setData(rowGenarator.enhanceRowData(chitietpnDB.select_PN_CTPN_VT(), 5));
+        rowGenarator.setData(rowGenarator.enhanceRowData(list, 5));
         rowGenarator.setSizeOfCell(sizeOfCell);
         rowGenarator.setIsCellPaddingZero(isPaddingZero);
         List<TableRow> rows = rowGenarator.generateArrayofRows();
@@ -419,16 +520,16 @@ public class ChiTietPhieuNhapLayout extends AppCompatActivity {
 
                 inputSLVT.setText(focusSL.getText());
                 int pn = 0, vt = 0;
-                phieunhap_list = phieunhapDB.select();
-                for (int i = 0; i < phieunhap_list.size(); i++){
-                    String maPNlist = phieunhap_list.get(i).getSoPhieu();
+                //phieuNhapArrayList = phieunhapDB.select();
+                for (int i = 0; i < phieuNhapArrayList.size(); i++){
+                    String maPNlist = phieuNhapArrayList.get(i).getSoPhieu();
                     String maPN = focusMaPN.getText().toString().trim();
                     if (maPNlist.equalsIgnoreCase(maPN)){
                         pn = i;break;
                     }
                 }
-                for (int i = 0; i < vattu_list.size(); i++){
-                    String mavtl = vattu_list.get(i).getMaVt().trim();
+                for (int i = 0; i < vatTuArrayList.size(); i++){
+                    String mavtl = vatTuArrayList.get(i).getMaVt().trim();
                     String mavt = focusMaVT.getText().toString().trim();
                     if (mavtl.equalsIgnoreCase(mavt)){
                         vt = i;break;
@@ -452,16 +553,16 @@ public class ChiTietPhieuNhapLayout extends AppCompatActivity {
 
                 inputSLVT.setText(focusSL.getText());
                 int pn = 0, vt = 0;
-                phieunhap_list = phieunhapDB.select();
-                for (int i = 0; i < phieunhap_list.size(); i++){
-                    String maPNlist = phieunhap_list.get(i).getSoPhieu();
+                //phieuNhapArrayList = phieunhapDB.select();
+                for (int i = 0; i < phieuNhapArrayList.size(); i++){
+                    String maPNlist = phieuNhapArrayList.get(i).getSoPhieu();
                     String maPN = focusMaPN.getText().toString().trim();
                     if (maPNlist.equalsIgnoreCase(maPN)){
                         pn = i;break;
                     }
                 }
-                for (int i = 0; i < vattu_list.size(); i++){
-                    String mavtl = vattu_list.get(i).getMaVt().trim();
+                for (int i = 0; i < vatTuArrayList.size(); i++){
+                    String mavtl = vatTuArrayList.get(i).getMaVt().trim();
                     String mavt = focusMaVT.getText().toString().trim();
                     if (mavtl.equalsIgnoreCase(mavt)){
                         vt = i;break;
@@ -506,7 +607,7 @@ public class ChiTietPhieuNhapLayout extends AppCompatActivity {
         });
     }
 
-    public void transferLayout(String maPK) {
+    public void transferLayout(String maPK) throws JSONException, AuthFailureError {
         if (maPK.trim().equalsIgnoreCase("")) return;
         // 1. maPK là all thì chuyển sang layout maPK
         switch (maPK) {
@@ -549,7 +650,7 @@ public class ChiTietPhieuNhapLayout extends AppCompatActivity {
     }
 
 
-    public void createCPLayout_fromPK(String maPK) {
+    public void createCPLayout_fromPK(String maPK){
         if (maPK.trim().equalsIgnoreCase("All")) return;
         // Init Variables and Control
         Rows rowGenarator = new Rows(this);
@@ -565,7 +666,7 @@ public class ChiTietPhieuNhapLayout extends AppCompatActivity {
         cp_totalPrice = cp_tablesindex_container.findViewById(R.id.CP_totalPrice);
 
         noteTotalLabel = cp_tablesindex_container.findViewById(R.id.CP_noteTotalLabel);
-        for (PhongKho pk : phongkho_list) {
+        for (PhongKho pk : phongKhoArrayList) {
             if (maPK.equalsIgnoreCase(pk.getMapk().trim())) {
                 selectedPK = pk;
 //                noteTotalLabel.setText("Tổng Chi phí trong " + pk.getTenpk() + " đang chứa :");
@@ -575,69 +676,98 @@ public class ChiTietPhieuNhapLayout extends AppCompatActivity {
         totalPrice = 0;
         // Create List<TableRow> for TableList
         // TABLE CP INDEX 01 ----------------------------------------------------------------------------------------
-        rowGenarator.setData(rowGenarator.enhanceRowData(chitietpnDB.selectVT_IndexPK(maPK), 4));
-        rowGenarator.setSizeOfCell(sizeOfCell);
-        rowGenarator.setIsCellPaddingZero(isPaddingZero);
-        List<TableRow> rows = rowGenarator.generateArrayofRows();
-        if (rows == null) {
-            cp_totalCount.setText("0");
-            cp_totalPrice.setText("0");
-            return;
-        }
-        for (TableRow row : rows) {
-            cp_table1.addView(row);
-            TextView totalpriceofVTView = (TextView) row.getChildAt(row.getChildCount() - 1);
-            int totalpriceofVT = 0;
-            for (int i = 0; i < vattu_list.size(); i++){
-                TextView slVTView = (TextView) row.getChildAt(0);
-                String mavt = slVTView.getText().toString().trim();
-                String mavtl = vattu_list.get(i).getMaVt().trim();
-                if (mavtl.equalsIgnoreCase(mavt)) {
-                    int slVT = Integer.parseInt(totalpriceofVTView.getText().toString().trim());
-                    totalpriceofVT = slVT * Integer.parseInt(vattu_list.get(i).getGiaNhap());
-                }
+        chitietpnDB.GetDataIndex(listIndex, this, new ChiTietPhieuNhapDB.VolleyCallBack() {
+            @Override
+            public void onSuccess(String response) {
+
             }
-            totalPrice += totalpriceofVT;
-        }
-        rowGenarator.setSizeOfCell(sizeOfCell2);
-        rowGenarator.setIsCellPaddingZero(isPaddingZero2);
 
-        for (int i = 1; i < cp_table1.getChildCount(); i++) {
-            TableRow row = (TableRow) cp_table1.getChildAt(i);
+            @Override
+            public void onError(String error) {
+                Log.d("AAA", "Lỗi! \n" + error.toString());
+            }
 
-            // Từ thằng VT được bấm gen ra thằng nhân viên đã mượn nó
-            row.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    int dem = v.getId();
-                    // TABLE CP INDEX 02 ----------------------------------------------------------------------------------------
-                    // Set text for noteVTLabel -------------------------------------------------------------------------
-                    TextView tenVTView = (TextView) row.getChildAt(1);
-                    noteVTLabel.setVisibility(View.VISIBLE);
-                    noteVTLabel.setText(tenVTView.getText().toString().trim() + " được nhập kho bởi phiếu nhập dưới đây");
-                    // ----------------------------------------------------------------------------------------------------
-                    TextView maVTView = (TextView) row.getChildAt(0);
-                    for (TableRow row : rows) {
-                        row.setBackgroundColor(getResources().getColor(R.color.white));
-                    }
-                    row.setBackgroundColor(getResources().getColor(R.color.selectedColor));
-                    rowGenarator.setData(rowGenarator.enhanceRowData(
-                            chitietpnDB.selectSP_IndexPK(
-                                    maPK,
-                                    maVTView.getText().toString().trim()
-                            ), 2));
-                    cp_table2.removeViews(1, cp_table2.getChildCount() - 1);
-                    List<TableRow> rows2 = rowGenarator.generateArrayofRows();
-                    for (TableRow row2 : rows2) {
-                        cp_table2.addView(row2);
-                    }
+            @Override
+            public void onSuccess() {
+                rowGenarator.setData(rowGenarator.enhanceRowData(listIndex, 4));
+                rowGenarator.setSizeOfCell(sizeOfCell);
+                rowGenarator.setIsCellPaddingZero(isPaddingZero);
+                List<TableRow> rows = rowGenarator.generateArrayofRows();
+                if (rows == null) {
+                    cp_totalCount.setText("0");
+                    cp_totalPrice.setText("0");
+                    return;
                 }
-            });
-        }
+                for (TableRow row : rows) {
+                    cp_table1.addView(row);
+                    TextView totalpriceofVTView = (TextView) row.getChildAt(row.getChildCount() - 1);
+                    int totalpriceofVT = 0;
+                    for (int i = 0; i < vatTuArrayList.size(); i++){
+                        TextView slVTView = (TextView) row.getChildAt(0);
+                        String mavt = slVTView.getText().toString().trim();
+                        String mavtl = vatTuArrayList.get(i).getMaVt().trim();
+                        if (mavtl.equalsIgnoreCase(mavt)) {
+                            int slVT = Integer.parseInt(totalpriceofVTView.getText().toString().trim());
+                            totalpriceofVT = slVT * Integer.parseInt(vatTuArrayList.get(i).getGiaNhap());
+                        }
+                    }
+                    totalPrice += totalpriceofVT;
+                }
+                rowGenarator.setSizeOfCell(sizeOfCell2);
+                rowGenarator.setIsCellPaddingZero(isPaddingZero2);
+
+                for (int i = 1; i < cp_table1.getChildCount(); i++) {
+                    TableRow row = (TableRow) cp_table1.getChildAt(i);
+
+                    // Từ thằng VT được bấm gen ra thằng nhân viên đã mượn nó
+                    row.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            int dem = v.getId();
+                            // TABLE CP INDEX 02 ----------------------------------------------------------------------------------------
+                            // Set text for noteVTLabel -------------------------------------------------------------------------
+                            TextView tenVTView = (TextView) row.getChildAt(1);
+                            noteVTLabel.setVisibility(View.VISIBLE);
+                            noteVTLabel.setText(tenVTView.getText().toString().trim() + " được nhập kho bởi phiếu nhập dưới đây");
+                            // ----------------------------------------------------------------------------------------------------
+                            TextView maVTView = (TextView) row.getChildAt(0);
+                            for (TableRow row : rows) {
+                                row.setBackgroundColor(getResources().getColor(R.color.white));
+                            }
+                            row.setBackgroundColor(getResources().getColor(R.color.selectedColor));
+                            chitietpnDB.GetDataPnIndexPK(listPnIndexPK, ChiTietPhieuNhapLayout.this, new ChiTietPhieuNhapDB.VolleyCallBack() {
+                                @Override
+                                public void onSuccess() {
+                                    rowGenarator.setData(rowGenarator.enhanceRowData(listPnIndexPK, 2));
+                                    cp_table2.removeViews(1, cp_table2.getChildCount() - 1);
+                                    List<TableRow> rows2 = new ArrayList<>();
+                                    rows2 = rowGenarator.generateArrayofRows();
+                                    for (TableRow row2 : rows2) {
+                                        cp_table2.addView(row2);
+                                    }
+                                }
+
+                                @Override
+                                public void onError(String error) {
+
+                                }
+
+                                @Override
+                                public void onSuccess(String response) {
+
+                                }
+                            }, maPK, maVTView.getText().toString().trim());
+
+                        }
+                    });
+                }
 //        // CP_totalCount : Tổng số các VT được cấp
-        cp_totalCount.setText((cp_table1.getChildCount() - 1) + "");
+                cp_totalCount.setText((cp_table1.getChildCount() - 1) + "");
 //        // CP_totalPrice : Tổng số tiền VT  = số lượng loại VT mà PN nhập * số tiền của mỗi loại VT
-        cp_totalPrice.setText(MoneyFormat(totalPrice));
+                cp_totalPrice.setText(MoneyFormat(totalPrice));
+            }
+        }, maPK);
+
     }
 
     public String MoneyFormat(int money) {
@@ -659,11 +789,10 @@ public class ChiTietPhieuNhapLayout extends AppCompatActivity {
 
     public ArrayAdapter<String> loadPBSpinner() {
         // 1. Tạo list Phong kho // 2. Đổ Phong_kho.getTenPK() ra 1 List // 3. setAdapter cho cái list getTenPK() đó
-        phongkho_list = new PhongKhoDatabase(ChiTietPhieuNhapLayout.this).select();
         ArrayList<String> phongbanNames_list = new ArrayList<>();
         phongbanNames_list.add("Tất cả phòng kho");
         // Phục vụ cho việc xổ ra Option cho Spinner
-        for (PhongKho pb : phongkho_list) {
+        for (PhongKho pb : phongKhoArrayList) {
             phongbanNames_list.add(pb.getTenpk());
 //            Log.d("data", pb.getTenpb());
         }
@@ -675,13 +804,17 @@ public class ChiTietPhieuNhapLayout extends AppCompatActivity {
         PKSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (position != 0) dataMaPKSpinner = phongkho_list.get(position - 1).getMapk();
+                if (position != 0) dataMaPKSpinner = phongKhoArrayList.get(position - 1).getMapk();
                 else {
                     // 1.
                     dataMaPKSpinner = "All";
 
                 }
-                transferLayout(dataMaPKSpinner);
+                try {
+                    transferLayout(dataMaPKSpinner);
+                } catch (JSONException | AuthFailureError e) {
+                    e.printStackTrace();
+                }
 //                Toast.makeText( CapphatVTLayout.this, dataMaPKSpinner+"", Toast.LENGTH_LONG).show();
             }
 
@@ -721,7 +854,7 @@ public class ChiTietPhieuNhapLayout extends AppCompatActivity {
     }
 
     public VatTu findVTinListVT(String maVT) {
-        for (VatTu vt : vattu_list) {
+        for (VatTu vt : vatTuArrayList) {
             if (vt.getMaVt().trim().equalsIgnoreCase(maVT))
                 return vt;
         }
@@ -729,18 +862,10 @@ public class ChiTietPhieuNhapLayout extends AppCompatActivity {
     }
 
     public PhieuNhap findMaPKinTablePN(String maPN){
-        for (PhieuNhap pn : phieunhap_list){
+        for (PhieuNhap pn : phieuNhapArrayList){
             if (pn.getSoPhieu().trim().equalsIgnoreCase(maPN)){
                 return pn;
             }
-        }
-        return null;
-    }
-
-    public ChiTietPhieuNhap findVTinListCTPN(String maPN, String maVT) {
-        for (ChiTietPhieuNhap ctpn : chitietpn_list) {
-            if (ctpn.getSoPhieu().trim().equalsIgnoreCase(maPN) && ctpn.getMaVT().trim().equalsIgnoreCase(maVT))
-                return ctpn;
         }
         return null;
     }
@@ -779,17 +904,6 @@ public class ChiTietPhieuNhapLayout extends AppCompatActivity {
         }
     }
 
-    public String setEventDisplayLVT(String sp) {
-        int dem = 0;
-        for (int i = 0; i < chitietpn_list.size(); i++) {
-            if (chitietpn_list.get(i).getSoPhieu().equals(sp)) {
-                dem++;
-            }
-        }
-        String label = "Loại vật tư: " + dem;
-        return label;
-    }
-
     public void setEventDisplayVT(String maVT) {
         labelVT.setVisibility(View.VISIBLE);
         VatTu vt = findVTinListVT( maVT );
@@ -819,14 +933,6 @@ public class ChiTietPhieuNhapLayout extends AppCompatActivity {
         });
     }
 
-    public VatTu findVTinListCTPN (String maVT ){
-        for( VatTu vt : vattu_list){
-            if( vt.getMaVt().trim().equalsIgnoreCase( maVT ))
-                return vt;
-        }
-        return null;
-    }
-
     // DIALOG HELPER ----------------------------------------------------------------------------
     public void createDialog(int layout) {
         dialog = new Dialog(ChiTietPhieuNhapLayout.this);
@@ -839,24 +945,24 @@ public class ChiTietPhieuNhapLayout extends AppCompatActivity {
         PN_spinner_mini.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                PN_spinner_mini_maPN = phieunhap_list.get(position).getSoPhieu().trim();
+                PN_spinner_mini_maPN = phieuNhapArrayList.get(position).getSoPhieu().trim();
 //                Toast.makeText( NhanvienLayout.this, PB_spinner_mini_maPB+"", Toast.LENGTH_LONG).show();
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-                PN_spinner_mini_maPN = phieunhap_list.get(0).getSoPhieu();
+                PN_spinner_mini_maPN = phieuNhapArrayList.get(0).getSoPhieu();
             }
         });
         VT_spinner_mini.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                VT_spinner_mini_maVT = vattu_list.get(position).getMaVt().trim();
+                VT_spinner_mini_maVT = vatTuArrayList.get(position).getMaVt().trim();
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-                VT_spinner_mini_maVT = vattu_list.get(0).getMaVt();
+                VT_spinner_mini_maVT = vatTuArrayList.get(0).getMaVt();
             }
         });
     }
@@ -882,13 +988,13 @@ public class ChiTietPhieuNhapLayout extends AppCompatActivity {
         inputSLVT = dialog.findViewById(R.id.CP_inputSLCP);
 
         ArrayList<String> PN_name = new ArrayList<>();
-        for (PhieuNhap pn : phieunhap_list) {
+        for (PhieuNhap pn : phieuNhapArrayList) {
             PN_name.add(pn.getSoPhieu());
         }
         PN_spinner_mini.setAdapter(loadSpinnerAdapter(PN_name));
 
         ArrayList<String> VT_name = new ArrayList<>();
-        for (VatTu vt : vattu_list) {
+        for (VatTu vt : vatTuArrayList) {
             VT_name.add(vt.getTenVt());
         }
         VT_spinner_mini.setAdapter(loadSpinnerAdapter(VT_name));
@@ -922,37 +1028,77 @@ public class ChiTietPhieuNhapLayout extends AppCompatActivity {
                         ChiTietPhieuNhap ctpn = new ChiTietPhieuNhap(PN_spinner_mini_maPN.trim(), VT_spinner_mini_maVT.trim()
                                 , Long.valueOf(inputSLVT.getText().toString().trim()));
 
-                        if(chitietpnDB.insert(ctpn) == -1)break;
+                        chitietpnDB.ThemCTPhieuNhap(ctpn, ChiTietPhieuNhapLayout.this, new ChiTietPhieuNhapDB.VolleyCallBack() {
+                            @Override
+                            public void onSuccess() {
+
+                            }
+
+                            @Override
+                            public void onError(String error) {
+                                Toast.makeText(ChiTietPhieuNhapLayout.this, "Loi!", Toast.LENGTH_SHORT).show();
+                                ErrorDialog();
+                            }
+
+                            @Override
+                            public void onSuccess(String response) {
+                                if(response.trim().equals("Success")){
+                                    Toast.makeText(ChiTietPhieuNhapLayout.this, "Them thanh cong!", Toast.LENGTH_SHORT).show();
+                                    SuccesssDialog();
+                                }else {
+                                    Toast.makeText(ChiTietPhieuNhapLayout.this,"That bai!", Toast.LENGTH_SHORT).show();
+                                    ErrorDialog();
+                                }
+                            }
+                        });
 
                         String maPK = findMaPKinTablePN(PN_spinner_mini_maPN.trim()).getMaK().trim();
                         String dataPK = dataMaPKSpinner.trim();
                         if(!maPK.equalsIgnoreCase(dataPK)){
                             if (dataPK.equalsIgnoreCase("All")){
-                                table();
+                                loadDatabase();
                             }
                         }else{
                             createCPLayout_fromPK(dataPK);
-                            table();
                         }
                         editBtn.setVisibility(View.INVISIBLE);
                         delBtn.setVisibility(View.INVISIBLE);
                         previewVTBtn.setVisibility(View.INVISIBLE);
+                        labelVT.setVisibility(View.INVISIBLE);
                         PN_spinner_mini_maPN = null;
                         VT_spinner_mini_maVT = null;
-
-                        success = true;
                     }
                         break;
                     case R.id.CP_editBtn: {
                         if (!isSafeDialog(true)) break;
                         ChiTietPhieuNhap ctpn = new ChiTietPhieuNhap(PN_spinner_mini_maPN.trim(),
                                 VT_spinner_mini_maVT.trim(), Long.valueOf(inputSLVT.getText().toString().trim()));
-                        if (chitietpnDB.update(ctpn) == -1) break;
+                        chitietpnDB.CapNhatCTPhieuNhap(ctpn, ChiTietPhieuNhapLayout.this, new ChiTietPhieuNhapDB.VolleyCallBack() {
+                            @Override
+                            public void onSuccess() {
+
+                            }
+
+                            @Override
+                            public void onError(String error) {
+                                ErrorDialog();
+                            }
+
+                            @Override
+                            public void onSuccess(String response) {
+                                if (response.trim().equalsIgnoreCase("success")){
+                                    SuccesssDialog();
+                                }
+                                else{
+                                    ErrorDialog();
+                                }
+                            }
+                        });
                         String maPK = findMaPKinTablePN(PN_spinner_mini_maPN.trim()).getMaK().trim();
                         String dataPK = dataMaPKSpinner.trim();
                         if (!maPK.equalsIgnoreCase(dataPK)) {
                             if (dataPK.equalsIgnoreCase("All")) {
-                                table();
+                                loadDatabase();
                             }
                         } else {
                             createCPLayout_fromPK(dataPK);
@@ -960,23 +1106,47 @@ public class ChiTietPhieuNhapLayout extends AppCompatActivity {
                         editBtn.setVisibility(View.INVISIBLE);
                         delBtn.setVisibility(View.INVISIBLE);
                         previewVTBtn.setVisibility(View.INVISIBLE);
+                        labelVT.setVisibility(View.INVISIBLE);
 
                         PN_spinner_mini_maPN = null;
                         VT_spinner_mini_maVT = null;
-
-                        success = true;
                     }
                         break;
                     case R.id.CP_delBtn: {
 
                         ChiTietPhieuNhap ctpn = new ChiTietPhieuNhap(PN_spinner_mini_maPN.trim(),
                                 VT_spinner_mini_maVT.trim(), Long.valueOf(inputSLVT.getText().toString().trim()));
-                        if (chitietpnDB.delete(ctpn) == -1) break;
+                        chitietpnDB.XoaCTPhieuNhap(ctpn, ChiTietPhieuNhapLayout.this, new ChiTietPhieuNhapDB.VolleyCallBack() {
+                            @Override
+                            public void onSuccess() {
+
+                            }
+
+                            @Override
+                            public void onError(String error) {
+                                Toast.makeText(ChiTietPhieuNhapLayout.this, "Xảy ra lỗi !", Toast.LENGTH_SHORT).show();
+                                Log.d("AAA", "Lỗi! \n" + error.toString());
+                                ErrorDialog();
+                            }
+
+                            @Override
+                            public void onSuccess(String response) {
+                                if (response.trim().equalsIgnoreCase("success")){
+                                    Toast.makeText(ChiTietPhieuNhapLayout.this, "Xoa Thành Công!", Toast.LENGTH_SHORT).show();
+                                    SuccesssDialog();
+                                }
+                                else{
+                                    Toast.makeText(ChiTietPhieuNhapLayout.this, "Lỗi Xoa!", Toast.LENGTH_SHORT).show();
+                                    Log.d("AAA", "Lỗi! \n" + response);
+                                    ErrorDialog();
+                                }
+                            }
+                        });
                         String maPK = findMaPKinTablePN(PN_spinner_mini_maPN.trim()).getMaK().trim();
                         String dataPK = dataMaPKSpinner.trim();
                         if (!maPK.equalsIgnoreCase(dataPK)) {
                             if (dataPK.equalsIgnoreCase("All")) {
-                                table();
+                                loadDatabase();
                             }
                         } else {
                             createCPLayout_fromPK(dataPK);
@@ -984,33 +1154,12 @@ public class ChiTietPhieuNhapLayout extends AppCompatActivity {
                         editBtn.setVisibility(View.INVISIBLE);
                         delBtn.setVisibility(View.INVISIBLE);
                         previewVTBtn.setVisibility(View.INVISIBLE);
-
-                        success = true;
+                        labelVT.setVisibility(View.INVISIBLE);
                     }
                     break;
 
                     default:
                         break;
-                }
-                if (success) {
-                    showResult.setText(showLabel.getText() + " thành công !");
-                    showResult.setTextColor(getResources().getColor(R.color.yes_color));
-                    showResult.setVisibility(View.VISIBLE);
-                    new Handler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-//                            input.setText("");
-//                            inputTenVT.setText("");
-//                            inputDVT.setText("");
-//                            inputGia.setText("");
-                            showResult.setVisibility(View.INVISIBLE);
-                            dialog.dismiss();
-                        }
-                    }, 1000);
-                } else {
-                    showResult.setTextColor(getResources().getColor(R.color.thoatbtn_bgcolor));
-                    showResult.setText(showLabel.getText() + " thất bại !");
-                    showResult.setVisibility(View.VISIBLE);
                 }
             }
         });
@@ -1062,7 +1211,7 @@ public class ChiTietPhieuNhapLayout extends AppCompatActivity {
                 TextView mapn_data = (TextView) tr.getChildAt(0);
                 TextView amvt_data = (TextView) tr.getChildAt(1);
 
-                if (!allowSameID)
+                if (!allowSameID && dataMaPKSpinner.trim().equalsIgnoreCase("All"))
                     if (sophieu.equalsIgnoreCase(mapn_data.getText().toString())) {
                         if(vattu.equalsIgnoreCase(amvt_data.getText().toString())) {
                             showVTError.setText("Mã VT không được trùng ");
@@ -1312,5 +1461,26 @@ public class ChiTietPhieuNhapLayout extends AppCompatActivity {
                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                 | View.SYSTEM_UI_FLAG_FULLSCREEN
                 | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
+    }
+    public void SuccesssDialog(){
+        showResult.setText(showLabel.getText() + " thành công !");
+        showResult.setTextColor(getResources().getColor(R.color.yes_color));
+        showResult.setVisibility(View.VISIBLE);
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+//                            input.setText("");
+//                            inputTenVT.setText("");
+//                            inputDVT.setText("");
+//                            inputGia.setText("");
+                showResult.setVisibility(View.INVISIBLE);
+                dialog.dismiss();
+            }
+        }, 1000);
+    }
+    public void ErrorDialog(){
+        showResult.setTextColor(getResources().getColor(R.color.thoatbtn_bgcolor));
+        showResult.setText(showLabel.getText() + " thất bại !");
+        showResult.setVisibility(View.VISIBLE);
     }
 }

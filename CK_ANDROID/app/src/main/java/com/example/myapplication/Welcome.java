@@ -27,7 +27,7 @@ public class Welcome extends AppCompatActivity {
             {
                 json.setVisibility(View.VISIBLE);
             }
-        }, 500);
+        }, 300);
         new Handler().postDelayed(new Runnable()
         {
             @Override
@@ -38,7 +38,7 @@ public class Welcome extends AppCompatActivity {
                 overridePendingTransition(R.anim.left, R.anim.right);
                 startActivity( intent );
             }
-        }, 300);
+        }, 3000);
     }
     private void setControl() {
 

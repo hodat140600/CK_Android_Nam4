@@ -10,44 +10,25 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
-import com.example.myapplication.Databases.PhieuNhapDatabase;
-import com.example.myapplication.Databases.ChiTietPhieuNhapDatabase;
-import com.example.myapplication.Databases.NhanVienDatabase;
-import com.example.myapplication.Databases.PhongKhoDatabase;
-import com.example.myapplication.Databases.VatTuDatabase;
+import com.example.myapplication.Entities.NhanVien;
 import com.example.myapplication.Main.ChiTietPhieuNhapLayout;
+import com.example.myapplication.Main.NhanvienLayout;
 import com.example.myapplication.Main.PhieuNhapLayout;
 import com.example.myapplication.Main.PhongkhoLayout;
 import com.example.myapplication.Main.VattuLayout;
 
 public class MainActivity extends AppCompatActivity {
-    CardView cardView1,cardView2,cardView3,cardView4;
+    CardView cardView1,cardView2,cardView3,cardView4, cardView5;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        //resetAll();
         setControl();
         setEvent();
         setAnim();
         hideSystemUI();
     }
 
-    private void resetAll() {
-        PhongKhoDatabase pkDB = new PhongKhoDatabase(this);
-//        NhanVienDatabase nvDB = new NhanVienDatabase(this);
-        VatTuDatabase vtDB = new VatTuDatabase(this);
-        PhieuNhapDatabase cpDB = new PhieuNhapDatabase(this);
-        ChiTietPhieuNhapDatabase ctcpDB = new ChiTietPhieuNhapDatabase(this);
-
-        pkDB.reset();
-//        nvDB.reset();
-        cpDB.reset();
-        vtDB.reset();
-        ctcpDB.reset();
-
-
-    }
     private void setEvent() {
         cardView1.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -81,6 +62,14 @@ public class MainActivity extends AppCompatActivity {
                 startActivity( intent );
             }
         });
+        cardView5.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, NhanvienLayout.class);
+                overridePendingTransition(R.anim.slide_from_left, R.anim.slide_to_right);
+                startActivity( intent );
+            }
+        });
     }
 
     private void setAnim() {
@@ -88,6 +77,7 @@ public class MainActivity extends AppCompatActivity {
         Animation animationLeft2 = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.left);
         Animation animationLeft3 = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.left);
         Animation animationLeft4 = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.left);
+        Animation animationLeft5 = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.left);
         new Handler().postDelayed(new Runnable()
         {
             @Override
@@ -124,6 +114,15 @@ public class MainActivity extends AppCompatActivity {
                 cardView4.startAnimation(animationLeft4);
             }
         }, 650);
+        new Handler().postDelayed(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                cardView5.setVisibility(View.VISIBLE);
+                cardView5.startAnimation(animationLeft5);
+            }
+        }, 750);
 
 
 //        cardView2.startAnimation(animationLeft);
@@ -142,6 +141,8 @@ public class MainActivity extends AppCompatActivity {
         cardView3.setVisibility(View.INVISIBLE);
         cardView4 = findViewById(R.id.cardView4);
         cardView4.setVisibility(View.INVISIBLE);
+        cardView5 = findViewById(R.id.cardView5);
+        cardView5.setVisibility(View.INVISIBLE);
     }
 
     private void hideSystemUI() {

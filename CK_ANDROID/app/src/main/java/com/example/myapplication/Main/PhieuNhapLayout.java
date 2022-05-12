@@ -22,19 +22,18 @@ import android.widget.Spinner;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import com.example.myapplication.Databases.ChiTietPhieuNhapDatabase;
-import com.example.myapplication.Databases.PhieuNhapDatabase;
-import com.example.myapplication.Databases.PhongKhoDatabase;
-import com.example.myapplication.Entities.ChiTietPhieuNhap;
+import com.example.myapplication.DB.ChiTietPhieuNhapDB;
+import com.example.myapplication.DB.PhieuNhapDB;
+import com.example.myapplication.DB.PhongKhoDB;
 import com.example.myapplication.Entities.PhieuNhap;
 import com.example.myapplication.Entities.PhongKho;
 import com.example.myapplication.R;
 
+
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.List;
-
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -83,13 +82,12 @@ public class PhieuNhapLayout extends AppCompatActivity {
     TextView showLabel;
 
     // Database Controller
-    PhieuNhapDatabase phieunhapDB;
-    PhongKhoDatabase phongkhoDB;
-    ChiTietPhieuNhapDatabase ctphieunhapDB;
+    PhieuNhapDB phieunhapDB;
+    PhongKhoDB phongkhoDB;
+    ChiTietPhieuNhapDB ctphieunhapDB;
 
-    List<PhongKho> phongkholist;
-    List<PhieuNhap> phieunhaplist;
-    List<ChiTietPhieuNhap> ctphieunhaplist;
+    ArrayList<PhongKho> phongKhoArrayList;
+    ArrayList<PhieuNhap> phieuNhapArrayList;
 
     // Focus
     int indexofRow = -1;
@@ -131,12 +129,11 @@ public class PhieuNhapLayout extends AppCompatActivity {
     }
 
     private void filter(String toString) {
-        TableRow tr = (TableRow) phieunhap_table_list.getChildAt(0);
-        int dem =1;
+        TableRow tr = null;
+        int dem =0;
         phieunhap_table_list.removeAllViews();
-        phieunhap_table_list.addView(tr);
-        for (int k = 0; k < phieunhaplist.size(); k++) {
-            PhieuNhap pn = phieunhaplist.get(k);
+        for (int k = 0; k < phieuNhapArrayList.size(); k++) {
+            PhieuNhap pn = phieuNhapArrayList.get(k);
             if (pn.getSoPhieu().toLowerCase().trim().contains(toString.trim().toLowerCase()) || pn.getMaK().toLowerCase().contains(toString.toLowerCase())) {
 
                 tr = createRow(PhieuNhapLayout.this, pn);
@@ -178,28 +175,58 @@ public class PhieuNhapLayout extends AppCompatActivity {
 
     public void loadDatabase() {
         Log.d("data", "Load Database --------");
-        phieunhapDB = new PhieuNhapDatabase(PhieuNhapLayout.this);
-        phongkhoDB = new PhongKhoDatabase(PhieuNhapLayout.this);
-        ctphieunhapDB = new ChiTietPhieuNhapDatabase(PhieuNhapLayout.this);
+        phieunhapDB = new PhieuNhapDB();
+        phongkhoDB = new PhongKhoDB();
+        ctphieunhapDB = new ChiTietPhieuNhapDB();
 
-        phieunhaplist = new ArrayList<>();
-        setCursorWindowImageSize(100 * 1024 * 1024);
-        TableRow tr = null;
-        phieunhaplist = phieunhapDB.select();
-        // Tag sẽ bắt đầu ở 1 vì phải cộng thêm thằng example đã có sẵn
-        for (int i = 0; i < phieunhaplist.size(); i++) {
-            tr = createRow(PhieuNhapLayout.this, phieunhaplist.get(i));
-            tr.setId((int) i + 1);
-            phieunhap_table_list.addView(tr);
-        }
+        phieuNhapArrayList = new ArrayList<>();
+        phongKhoArrayList = new ArrayList<>();
+        phieunhap_table_list.removeAllViews();
+        phieunhapDB.GetData(phieuNhapArrayList, this, new PhieuNhapDB.VolleyCallBack() {
+            @Override
+            public void onSuccess() {
+                phieunhap_table_list.removeAllViews();
+                TableRow tr = null;
+                for (int i = 0; i < phieuNhapArrayList.size(); i++) {
+                    tr = createRow(PhieuNhapLayout.this, phieuNhapArrayList.get(i));
+                    tr.setId((int) i);
+                    phieunhap_table_list.addView(tr);
+                    setEventTableRows(tr, phieunhap_table_list);
+                }
+            }
 
-        phongkholist = phongkhoDB.select();
-        ArrayList<String> PK_name = new ArrayList<>();
-        PK_name.add("Tất cả phòng kho");
-        for (PhongKho pk : phongkholist) {
-            PK_name.add(pk.getTenpk());
-        }
-        PK_spinner.setAdapter(loadSpinnerAdapter(PK_name));
+            @Override
+            public void onError(String error) {
+
+            }
+
+            @Override
+            public void onSuccess(String response) {
+
+            }
+        });
+        phongkhoDB.GetData(phongKhoArrayList, this, new PhongKhoDB.VolleyCallBack() {
+            @Override
+            public void onSuccess() {
+                ArrayList<String> PK_name = new ArrayList<>();
+                PK_name.add("Tất cả phòng kho");
+                for (PhongKho pk : phongKhoArrayList) {
+                    PK_name.add(pk.getTenpk());
+                }
+                PK_spinner.setAdapter(loadSpinnerAdapter(PK_name));
+            }
+
+            @Override
+            public void onError(String error) {
+
+            }
+
+            @Override
+            public void onSuccess(String response) {
+
+            }
+        });
+
 
     }
 
@@ -261,16 +288,12 @@ public class PhieuNhapLayout extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (position == 0) {
-                    if (phieunhap_table_list.getChildCount() < phieunhaplist.size() + 1) {
+                    if (phieunhap_table_list.getChildCount() < phieuNhapArrayList.size() + 1) {
                         PK_spinner_maPK = "All";
-                        // Nếu có sort trước đó làm cho số Phiếu nhập nhỏ hơn số Phiếu nhập tổng thì mới sort lại theo all
-                        TableRow tr = (TableRow) phieunhap_table_list.getChildAt(0);
+                        TableRow tr = null;
                         phieunhap_table_list.removeAllViews();
-                        phieunhap_table_list.addView(tr);
-                        phieunhaplist = phieunhapDB.select();
-                        // Tag sẽ bắt đầu ở 1 vì phải cộng thêm thằng example đã có sẵn
-                        for (int i = 0; i < phieunhaplist.size(); i++) {
-                            PhieuNhap pn = phieunhaplist.get(i);
+                        for (int i = 0; i < phieuNhapArrayList.size(); i++) {
+                            PhieuNhap pn = phieuNhapArrayList.get(i);
                             tr = createRow(PhieuNhapLayout.this, pn);
                             tr.setId((int) i + 1);
                             phieunhap_table_list.addView(tr);
@@ -278,16 +301,13 @@ public class PhieuNhapLayout extends AppCompatActivity {
                         }
                     }
                 } else {
-                    int dem = 1;
-                    String mapk = phongkholist.get(position - 1).getMapk();
+                    int dem = 0;
+                    String mapk = phongKhoArrayList.get(position - 1).getMapk();
                     PK_spinner_maPK = mapk;
-                    // Select lại toàn bộ table
-                    TableRow tr = (TableRow) phieunhap_table_list.getChildAt(0);
+                    TableRow tr = null;
                     phieunhap_table_list.removeAllViews();
-                    phieunhap_table_list.addView(tr);
-                    phieunhaplist = phieunhapDB.select();
-                    for (int i = 0; i < phieunhaplist.size(); i++) {
-                        PhieuNhap pn = phieunhaplist.get(i);
+                    for (int i = 0; i < phieuNhapArrayList.size(); i++) {
+                        PhieuNhap pn = phieuNhapArrayList.get(i);
                         if (pn.getMaK().trim().equals(mapk.trim())) {
                             tr = createRow(PhieuNhapLayout.this, pn);
                             tr.setId((int) dem++);
@@ -325,7 +345,7 @@ public class PhieuNhapLayout extends AppCompatActivity {
                 // Control
                 setControlDialog();
                 // Event
-                strDate = formatDate(InttoStringDate(17, 4, 2022), true);
+                strDate = formatDate(InttoStringDate(30, 5, 2022), true);
                 setEventDialog(v);
 
             }
@@ -346,14 +366,14 @@ public class PhieuNhapLayout extends AppCompatActivity {
                     int[] date = StringtoIntDate(focusNLPN.getText().toString().trim());
 
                     int index = 0;
-                    for (int i = 0; i < phieunhaplist.size(); i++) {
+                    for (int i = 0; i < phieuNhapArrayList.size(); i++) {
                         // Nếu thằng được focus có mã PK trùng với PB trong list thì break
-                        String maPN = phieunhaplist.get(i).getSoPhieu().trim();
+                        String maPN = phieuNhapArrayList.get(i).getSoPhieu().trim();
                         String maPNF = focusMaPN.getText().toString().trim();
                         if (maPN.equals(maPNF)) {
-                            for (int k = 0; k < phongkholist.size(); k++) {
-                                String makPn = phieunhaplist.get(i).getMaK().trim();
-                                String makS = phongkholist.get(k).getMapk().trim();
+                            for (int k = 0; k < phongKhoArrayList.size(); k++) {
+                                String makPn = phieuNhapArrayList.get(i).getMaK().trim();
+                                String makS = phongKhoArrayList.get(k).getMapk().trim();
                                 if (makPn.equals(makS)) {
                                     index = k;
                                     break;
@@ -363,7 +383,7 @@ public class PhieuNhapLayout extends AppCompatActivity {
                     }
                     inputMaPN.setText(focusMaPN.getText());
                     PK_spinner_mini.setSelection(index);
-                    datepickerNLPN.updateDate(date[2], date[1] - 1, date[0]);
+                    datepickerNLPN.updateDate(date[0], date[1] - 1, date[2]);
                     inputMaPN.setEnabled(false);
 
                 }
@@ -381,14 +401,14 @@ public class PhieuNhapLayout extends AppCompatActivity {
                     // Event
                     setEventDialog(v);
                     int index = 0;
-                    for (int i = 0; i < phieunhaplist.size(); i++) {
+                    for (int i = 0; i < phieuNhapArrayList.size(); i++) {
                         // Nếu thằng được focus có mã PK trùng với PB trong list thì break
-                        String maPN = phieunhaplist.get(i).getSoPhieu().trim();
+                        String maPN = phieuNhapArrayList.get(i).getSoPhieu().trim();
                         String maPNF = focusMaPN.getText().toString().trim();
                         if (maPN.equals(maPNF)) {
-                            for (int k = 0; k < phongkholist.size(); k++) {
-                                String makPn = phieunhaplist.get(i).getMaK().trim();
-                                String makS = phongkholist.get(k).getMapk().trim();
+                            for (int k = 0; k < phongKhoArrayList.size(); k++) {
+                                String makPn = phieuNhapArrayList.get(i).getMaK().trim();
+                                String makS = phongKhoArrayList.get(k).getMapk().trim();
                                 if (makPn.equals(makS)) {
                                     index = k;
                                     break;
@@ -400,7 +420,7 @@ public class PhieuNhapLayout extends AppCompatActivity {
 
                     PK_spinner_mini.setSelection(index);
                     inputMaPN.setText(focusMaPN.getText());
-                    datepickerNLPN.updateDate(date[2], date[1] - 1, date[0]);
+                    datepickerNLPN.updateDate(date[0], date[1] - 1, date[2]);
                     PK_spinner_mini.setEnabled(false);
                     inputMaPN.setEnabled(false);
                     datepickerNLPN.setEnabled(false);
@@ -414,7 +434,7 @@ public class PhieuNhapLayout extends AppCompatActivity {
     public void setNormalBGTableRows(TableLayout list) {
         // 0: là thằng example đã INVISIBLE
         // Nên bắt đầu từ 1 -> 9
-        for (int i = 1; i < list.getChildCount(); i++) {
+        for (int i = 0; i < list.getChildCount(); i++) {
             TableRow row = (TableRow) list.getChildAt((int) i);
             if (indexofRow != (int) row.getId())
                 row.setBackgroundColor(getResources().getColor(R.color.white));
@@ -451,21 +471,21 @@ public class PhieuNhapLayout extends AppCompatActivity {
         PK_spinner_mini.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                PK_spinner_mini_maPK = phongkholist.get(position).getMapk();
+                PK_spinner_mini_maPK = phongKhoArrayList.get(position).getMapk();
 //                Toast.makeText( NhanvienLayout.this, PB_spinner_mini_maPB+"", Toast.LENGTH_LONG).show();
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-                PK_spinner_mini_maPK = phongkholist.get(0).getMapk();
+                PK_spinner_mini_maPK = phongKhoArrayList.get(0).getMapk();
             }
         });
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     public void setEventDatePicker() {
-        strDate = formatDate(InttoStringDate(30, 8, 1999), true);
-        datepickerNLPN.init(1999, 07, 30, new DatePicker.OnDateChangedListener() {
+        strDate = formatDate(InttoStringDate(30, 5, 2022), true);
+        datepickerNLPN.init(2022, 5, 30, new DatePicker.OnDateChangedListener() {
             @Override
             public void onDateChanged(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
                 strDate = formatDate(InttoStringDate(dayOfMonth, monthOfYear + 1, year), true);
@@ -483,7 +503,7 @@ public class PhieuNhapLayout extends AppCompatActivity {
 
         PK_spinner_mini = phieunhapdialog.findViewById(R.id.PN_PKSpinner_mini);
         ArrayList<String> PK_name = new ArrayList<>();
-        for (PhongKho pk : phongkholist) {
+        for (PhongKho pk : phongKhoArrayList) {
             PK_name.add(pk.getTenpk());
         }
         PK_spinner_mini.setAdapter(loadSpinnerAdapter(PK_name));
@@ -526,31 +546,35 @@ public class PhieuNhapLayout extends AppCompatActivity {
                     case R.id.PN_insertBtn: {
                         if (!isSafeDialog(false)) break;
                         PhieuNhap pn = new PhieuNhap(inputMaPN.getText().toString().trim(), strDate, PK_spinner_mini_maPK.trim());
-                        if (phieunhapDB.insert(pn) == -1) break;
-                        TableRow tr = createRow(PhieuNhapLayout.this, pn);
-                        int n = phieunhap_table_list.getChildCount();
-                        tr.setId(n);
-                        if (!PK_spinner_mini_maPK.trim().equals(PK_spinner_maPK.trim())) {
-                            // Nếu thằng bên trong là phòng kho nhưng bên ngoài là tất cả phòng kho thì
-                            if (PK_spinner_maPK.trim().equals("All")) {
-                                // cứ insert như bth
-                                phieunhap_table_list.addView(tr);
-                                setEventTableRows((TableRow) phieunhap_table_list.getChildAt(n), phieunhap_table_list);
+                        phieunhapDB.ThemPhieuNhap(pn, PhieuNhapLayout.this, new PhieuNhapDB.VolleyCallBack() {
+                            @Override
+                            public void onSuccess() {
+
                             }
-                            // Nếu thằng bên trong là phòng kho nhưng bên ngoài là phòng kho khác thì khỏi thêm table
-                            // Nếu trùng
-                        } else {
-                            phieunhap_table_list.addView(tr);
-                            setEventTableRows((TableRow) phieunhap_table_list.getChildAt(n), phieunhap_table_list);
-                        }
-                        phieunhaplist.add(pn);
+                            @Override
+                            public void onError(String error) {
+                                Toast.makeText(PhieuNhapLayout.this, "Loi Ket Noi!", Toast.LENGTH_SHORT).show();
+                                ErrorDialog();
+                            }
+                            @Override
+                            public void onSuccess(String response) {
+                                if(response.trim().equals("Success")){
+                                    Toast.makeText(PhieuNhapLayout.this, "Them thanh cong!", Toast.LENGTH_SHORT).show();
+                                    SuccesssDialog();
+                                    phieunhap_table_list.removeAllViews();
+                                    loadDatabase();
+                                }else {
+                                    Toast.makeText(PhieuNhapLayout.this, "That bai!", Toast.LENGTH_SHORT).show();
+                                    ErrorDialog();
+                                }
+                            }
+                        });
                         editBtn.setVisibility(View.INVISIBLE);
                         delBtn.setVisibility(View.INVISIBLE);
                         focusRow = null;
                         focusMaPN = null;
                         focusNLPN = null;
                         PK_spinner_mini_maPK = null;
-                        success = true;
                     }
                     break;
                     case R.id.PN_editBtn: {
@@ -562,72 +586,61 @@ public class PhieuNhapLayout extends AppCompatActivity {
                                 id.getText().toString().trim()
                                 , strDate
                                 , PK_spinner_mini_maPK);
-                        if (phieunhapDB.update(pn) == -1) break;
-                        //   Cập nhật phiếu nhập list bằng cách lấy cái index ra và add vào cái index đó
-                        int index = 0;
-                        phieunhaplist = phieunhapDB.select();
-                        for (int i = 0; i < phieunhaplist.size(); i++) {
-                            if (phieunhaplist.get(i).getSoPhieu().equals(id.getText().toString().trim())) {
-                                index = i;
-                                break;
-                            }
-                        }
-                        Log.d("process", index + "");
-                        phieunhaplist.set(index, pn);
-                        boolean edit = false, changePN = false;
-                        if (!PK_spinner_mini_maPK.trim().equals(PK_spinner_maPK.trim())) {
-                            // Khi không cần biết thay đổi PK như thế nào nhưng bên ngoài là All thì cứ edit thôi
-                            if (PK_spinner_maPK.trim().equals("All"))
-                                edit = true;
-                                // Vậy trường hợp đang là Phòng kho Thủ Đức muốn thay Phòng kho Bình Chánh thì
-                            else {
-                                changePN = true;
-                            }
-                        } else {
-                            // Khi giữ nguyên phòng kho
-                            edit = true;
-                        }
+                        phieunhapDB.CapNhatPhieuNhap(pn, PhieuNhapLayout.this, new PhieuNhapDB.VolleyCallBack() {
+                            @Override
+                            public void onSuccess() {
 
-                        if (edit) {
-                            date.setText(formatDate(strDate, false));
-                            tr.setTag(pn.getMaK());
-                        }
-                        if (changePN) {
-                            if (indexofRow == phieunhap_table_list.getChildCount() - 1) {
-                                phieunhap_table_list.removeViewAt(indexofRow);
-                            } else {
-                                phieunhap_table_list.removeViewAt(indexofRow);
-                                for (int i = 0; i < phieunhap_table_list.getChildCount(); i++) {
-                                    phieunhap_table_list.getChildAt(i).setId((int) i);
+                            }
+
+                            @Override
+                            public void onError(String error) {
+                                ErrorDialog();
+                            }
+
+                            @Override
+                            public void onSuccess(String response) {
+                                if (response.trim().equalsIgnoreCase("success")){
+                                    SuccesssDialog();
+                                    loadDatabase();
+                                }
+                                else{
+                                    ErrorDialog();
                                 }
                             }
-                        }
-                        success = true;
+                        });
                     }
                     break;
                     case R.id.PN_delBtn: {
                         PhieuNhap pn = new PhieuNhap(
                                 focusMaPN.getText().toString().trim(),
-                                formatDate(focusNLPN.getText().toString().trim(), true),
+                                focusNLPN.getText().toString().trim(),
                                 PK_spinner_mini_maPK.trim());
-                        boolean del = false;
-                        if (phieunhapDB.delete(pn) == -1) break;
-                        if (indexofRow == phieunhap_table_list.getChildCount() - 1) {
-                            phieunhap_table_list.removeViewAt(indexofRow);
-                        } else {
-                            phieunhap_table_list.removeViewAt(indexofRow);
-                            for (int i = 0; i < phieunhap_table_list.getChildCount(); i++) {
-                                phieunhap_table_list.getChildAt(i).setId((int) i);
+                        phieunhapDB.XoaPhieuNhap(pn, PhieuNhapLayout.this, new PhieuNhapDB.VolleyCallBack() {
+                            @Override
+                            public void onSuccess() {
+
                             }
-                        }
-//                        int index = 0;
-//                        for (int i = 0; i < phieunhaplist.size(); i++) {
-//                            if (phieunhaplist.get(i).getSoPhieu().equals(focusMaPN.getText().toString().trim())) {
-//                                index = i;
-//                                break;
-//                            }
-//                        }
-//                        phieunhaplist.remove(index);
+
+                            @Override
+                            public void onError(String error) {
+                                Toast.makeText(PhieuNhapLayout.this, "Xảy ra lỗi !", Toast.LENGTH_SHORT).show();
+                                Log.d("AAA", "Lỗi! \n" + error.toString());
+                                ErrorDialog();
+                            }
+
+                            @Override
+                            public void onSuccess(String response) {
+                                if (response.trim().equalsIgnoreCase("success")){
+                                    Toast.makeText(PhieuNhapLayout.this, "Xoa Thành Công!", Toast.LENGTH_SHORT).show();
+                                    SuccesssDialog();
+                                    loadDatabase();
+                                }
+                                else{
+                                    Toast.makeText(PhieuNhapLayout.this, "Lỗi Xoa!", Toast.LENGTH_SHORT).show();
+                                    ErrorDialog();
+                                }
+                            }
+                        });
 
                         editBtn.setVisibility(View.INVISIBLE);
                         delBtn.setVisibility(View.INVISIBLE);
@@ -635,28 +648,10 @@ public class PhieuNhapLayout extends AppCompatActivity {
                         focusMaPN = null;
                         focusNLPN = null;
                         PK_spinner_mini_maPK = null;
-                        success = true;
                     }
                     break;
                     default:
                         break;
-                }
-                if (success) {
-                    showResult.setText(showLabel.getText() + " thành công !");
-                    showResult.setTextColor(getResources().getColor(R.color.yes_color));
-                    showResult.setVisibility(View.VISIBLE);
-                    new Handler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            inputMaPN.setText("");
-                            showResult.setVisibility(View.INVISIBLE);
-                            phieunhapdialog.dismiss();
-                        }
-                    }, 1000);
-                } else {
-                    showResult.setTextColor(getResources().getColor(R.color.thoatbtn_bgcolor));
-                    showResult.setText(showLabel.getText() + " thất bại !");
-                    showResult.setVisibility(View.VISIBLE);
                 }
             }
         });
@@ -716,7 +711,7 @@ public class PhieuNhapLayout extends AppCompatActivity {
 
     public int[] StringtoIntDate(String str) {
         int[] date = new int[3];
-        String[] arr = str.split("/");
+        String[] arr = str.split("-");
         date[0] = Integer.parseInt(arr[0]);
         date[1] = Integer.parseInt(arr[1]);
         date[2] = Integer.parseInt(arr[2]);
@@ -760,18 +755,18 @@ public class PhieuNhapLayout extends AppCompatActivity {
         TextView maPN = (TextView) getLayoutInflater().inflate(R.layout.tvtemplate, null);
 
         maPN.setLayoutParams(new TableRow.LayoutParams(TableLayout.LayoutParams.FILL_PARENT, TableLayout.LayoutParams.FILL_PARENT, 10.0f));
-        maPN.setMaxWidth(DPtoPix(100));
+        maPN.setWidth(DPtoPix(150));
         maPN.setPadding(20, 20, 20, 20);
-        maPN.setText(pn.getSoPhieu());
+        maPN.setText(pn.getSoPhieu().trim());
 
 
         //  Ngày lập phiếu
         TextView ngayLapPN = (TextView) getLayoutInflater().inflate(R.layout.tvtemplate, null);
 
         ngayLapPN.setLayoutParams(new TableRow.LayoutParams(TableLayout.LayoutParams.FILL_PARENT, TableLayout.LayoutParams.FILL_PARENT, 10.0f));
-        ngayLapPN.setPadding(0, 0, 0, 0);
-        ngayLapPN.setMaxWidth(DPtoPix(200));
-        ngayLapPN.setText(formatDate(pn.getNgayLap(), false));
+        ngayLapPN.setPadding(20, 20, 20, 20);
+        ngayLapPN.setWidth(DPtoPix(260));
+        ngayLapPN.setText(pn.getNgayLap().trim());
 
         tr.setBackgroundColor(getResources().getColor(R.color.white));
         tr.addView(maPN);
@@ -797,5 +792,23 @@ public class PhieuNhapLayout extends AppCompatActivity {
                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                 | View.SYSTEM_UI_FLAG_FULLSCREEN
                 | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
+    }
+    public void SuccesssDialog(){
+        showResult.setText(showLabel.getText() + " thành công !");
+        showResult.setTextColor(getResources().getColor(R.color.yes_color));
+        showResult.setVisibility(View.VISIBLE);
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                inputMaPN.setText("");
+                showResult.setVisibility(View.INVISIBLE);
+                phieunhapdialog.dismiss();
+            }
+        }, 1000);
+    }
+    public void ErrorDialog(){
+        showResult.setTextColor(getResources().getColor(R.color.thoatbtn_bgcolor));
+        showResult.setText(showLabel.getText() + " thất bại !");
+        showResult.setVisibility(View.VISIBLE);
     }
 }

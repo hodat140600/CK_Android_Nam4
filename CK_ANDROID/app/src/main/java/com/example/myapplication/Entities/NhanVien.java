@@ -6,6 +6,7 @@ public class NhanVien {
     private String hoTen;
     private String ngaySinh;
     private String maPk;
+    private String email;
 
     //    public NhanVien(long id, String maNv, String hoTen, String ngaySinh, String maPb) {
 //        this.id = id;
@@ -19,6 +20,13 @@ public class NhanVien {
         this.hoTen = hoTen;
         this.ngaySinh = ngaySinh;
         this.maPk = maPk;
+    }
+    public NhanVien( String maNv, String hoTen, String ngaySinh, String maPk, String email) {
+        this.maNv = maNv;
+        this.hoTen = hoTen;
+        this.ngaySinh = ngaySinh;
+        this.maPk = maPk;
+        this.email = email;
     }
 
     @Override
@@ -80,4 +88,12 @@ public class NhanVien {
     public void setMaPk(String maPk) {
         this.maPk = maPk;
     }
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
 }

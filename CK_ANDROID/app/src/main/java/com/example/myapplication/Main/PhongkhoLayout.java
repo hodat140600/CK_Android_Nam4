@@ -19,42 +19,13 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
-
-import com.android.volley.AuthFailureError;
-import com.android.volley.NetworkResponse;
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-
-import com.android.volley.Response;
-
-
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonArrayRequest;
-import com.android.volley.toolbox.RequestFuture;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
-
-import com.example.myapplication.Databases.PhongKhoDatabase;
+import com.example.myapplication.DB.PhongKhoDB;
 import com.example.myapplication.Entities.PhongKho;
 import com.example.myapplication.R;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class PhongkhoLayout extends AppCompatActivity {
@@ -97,7 +68,7 @@ public class PhongkhoLayout extends AppCompatActivity {
     TextView showLabel;
 
     // Database Controller
-    PhongKhoDatabase phongkhoDB;
+    PhongKhoDB phongkhoDB;
 
     // Focus
     int indexofRow = -1;
@@ -342,11 +313,32 @@ public class PhongkhoLayout extends AppCompatActivity {
     public void loadDatabase() {
         setCursorWindowImageSize(100 * 1024* 1024);
 
+        phongkhoDB = new PhongKhoDB();
         phongKhoArrayList = new ArrayList<>();
         phongkho_table_list.removeAllViews();
-
         phongKhoArrayList.clear();
-        GetData(urlGetData);
+        phongkhoDB.GetData(phongKhoArrayList, PhongkhoLayout.this, new PhongKhoDB.VolleyCallBack() {
+            @Override
+            public void onSuccess() {
+                TableRow tr = null;
+                for (int i = 0; i < phongKhoArrayList.size(); i++) {
+                    tr = createRow1(PhongkhoLayout.this, phongKhoArrayList.get(i));
+                    tr.setId((int) i);
+                    phongkho_table_list.addView(tr);
+                    setEventTableRows(tr, phongkho_table_list);
+                }
+            }
+
+            @Override
+            public void onError(String error) {
+
+            }
+
+            @Override
+            public void onSuccess(String response) {
+
+            }
+        });
 
     }
 
@@ -405,7 +397,31 @@ public class PhongkhoLayout extends AppCompatActivity {
                         }
                         PhongKho pk = new PhongKho(inputMaPK.getText().toString().trim() + "", inputTenPK.getText().toString().trim() + ""
                                 , inputDiaChi.getText().toString().trim() + "", inputSDT.getText().toString().trim() + "");
-                        ThemPhongKho(urlInsert, pk);
+                        phongkhoDB.ThemPhongKho(pk, PhongkhoLayout.this, new PhongKhoDB.VolleyCallBack() {
+                            @Override
+                            public void onSuccess() {
+
+                            }
+
+                            @Override
+                            public void onError(String error) {
+                                Toast.makeText(PhongkhoLayout.this, "Loi!", Toast.LENGTH_SHORT).show();
+                                ErrorDialog();
+                            }
+
+                            @Override
+                            public void onSuccess(String response) {
+                                if(response.trim().equals("Success")){
+                                    Toast.makeText(PhongkhoLayout.this, "Them thanh cong!", Toast.LENGTH_SHORT).show();
+                                    SuccesssDialog();
+                                    phongkho_table_list.removeAllViews();
+                                    loadDatabase();
+                                }else {
+                                    Toast.makeText(PhongkhoLayout.this,"That bai!", Toast.LENGTH_SHORT).show();
+                                    ErrorDialog();
+                                }
+                            }
+                        });
 
                         editBtn.setVisibility(View.INVISIBLE);
                         delBtn.setVisibility(View.INVISIBLE);
@@ -421,19 +437,64 @@ public class PhongkhoLayout extends AppCompatActivity {
                         TableRow tr = (TableRow) phongkho_table_list.getChildAt(indexofRow);
                         TextView id = (TextView) tr.getChildAt(0);
                         TextView name = (TextView) tr.getChildAt(1);
-                        CapNhatPhongKho(urlCapNhat,new PhongKho(id.getText().toString().trim(),
+                        phongkhoDB.CapNhatPhongKho(new PhongKho(id.getText().toString().trim(),
                                 inputTenPK.getText().toString().trim(), inputDiaChi.getText().toString().trim(),
-                                inputSDT.getText().toString().trim()));
-                        phongkho_table_list.removeAllViews();
+                                inputSDT.getText().toString().trim()), PhongkhoLayout.this, new PhongKhoDB.VolleyCallBack() {
+                            @Override
+                            public void onSuccess() {
 
+                            }
+
+                            @Override
+                            public void onError(String error) {
+                                ErrorDialog();
+                            }
+
+                            @Override
+                            public void onSuccess(String response) {
+                                if (response.trim().equalsIgnoreCase("success")){
+                                    SuccesssDialog();
+                                    loadDatabase();
+                                }
+                                else{
+                                    ErrorDialog();
+                                }
+                            }
+                        });
                     }
                     break;
                     case R.id.PK_delBtn: {
                         TableRow tr = (TableRow) phongkho_table_list.getChildAt(indexofRow);
                         TextView id = (TextView) tr.getChildAt(0);
-                        XoaPhongKho(urlDelete,new PhongKho(id.getText().toString().trim(),
+                        phongkhoDB.XoaPhongKho(new PhongKho(id.getText().toString().trim(),
                                 inputTenPK.getText().toString().trim(), inputDiaChi.getText().toString().trim(),
-                                inputSDT.getText().toString().trim()));
+                                inputSDT.getText().toString().trim()), PhongkhoLayout.this, new PhongKhoDB.VolleyCallBack() {
+                            @Override
+                            public void onSuccess() {
+
+                            }
+
+                            @Override
+                            public void onError(String error) {
+                                Toast.makeText(PhongkhoLayout.this, "Xảy ra lỗi !", Toast.LENGTH_SHORT).show();
+                                Log.d("AAA", "Lỗi! \n" + error.toString());
+                                ErrorDialog();
+                            }
+
+                            @Override
+                            public void onSuccess(String response) {
+                                if (response.trim().equalsIgnoreCase("success")){
+                                    Toast.makeText(PhongkhoLayout.this, "Xoa Thành Công!", Toast.LENGTH_SHORT).show();
+                                    SuccesssDialog();
+                                    loadDatabase();
+                                }
+                                else{
+                                    Toast.makeText(PhongkhoLayout.this, "Lỗi Xoa!", Toast.LENGTH_SHORT).show();
+                                    Log.d("AAA", "Lỗi! \n" + response);
+                                    ErrorDialog();
+                                }
+                            }
+                        });
                         editBtn.setVisibility(View.INVISIBLE);
                         delBtn.setVisibility(View.INVISIBLE);
                         focusRow = null;
@@ -629,145 +690,5 @@ public class PhongkhoLayout extends AppCompatActivity {
                 | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
     }
     //API
-    private void ThemPhongKho(String url, PhongKho phongKho){
-        RequestQueue mRequestQueue = Volley.newRequestQueue(this);
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
-                if(response.trim().equals("Success")){
-                    Toast.makeText(PhongkhoLayout.this, "Them thanh cong!", Toast.LENGTH_SHORT).show();
-                    SuccesssDialog();
-                    phongkho_table_list.removeAllViews();
-                    GetData(urlGetData);
-                }else {
-                    Toast.makeText(PhongkhoLayout.this, "That bai!", Toast.LENGTH_SHORT).show();
-                    ErrorDialog();
-                }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Toast.makeText(PhongkhoLayout.this, "Loi!", Toast.LENGTH_SHORT).show();
-                ErrorDialog();
-            }
-        })
-            {
-            @Nullable
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                Map<String, String> params = new HashMap<>();
-                params.put("mapk",phongKho.getMapk());
-                params.put("tenpk",phongKho.getTenpk());
-                params.put("diachi",phongKho.getDiachi());
-                params.put("sdt",phongKho.getSdt());
 
-                return params;
-            }
-        };
-        mRequestQueue.add(stringRequest);
-
-    }
-    private void CapNhatPhongKho(String url, PhongKho phongKho){
-        RequestQueue requestQueue = Volley.newRequestQueue(this);
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
-                if (response.trim().equalsIgnoreCase("success")){
-                    SuccesssDialog();
-                    phongkho_table_list.removeAllViews();
-                    GetData(urlGetData);
-                }
-                else{
-                    ErrorDialog();
-                }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                ErrorDialog();
-            }
-        }){
-            @Nullable
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                Map<String, String> params = new HashMap<>();
-                params.put("mapk",phongKho.getMapk());
-                params.put("tenpk",phongKho.getTenpk());
-                params.put("diachi",phongKho.getDiachi());
-                params.put("sdt",phongKho.getSdt());
-                return params;
-            }
-        };
-        requestQueue.add(stringRequest);
-    }
-    private void XoaPhongKho(String url, PhongKho phongKho){
-        RequestQueue requestQueue = Volley.newRequestQueue(this);
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, urlDelete, new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
-                if (response.trim().equalsIgnoreCase("success")){
-                    Toast.makeText(PhongkhoLayout.this, "Xoa Thành Công!", Toast.LENGTH_SHORT).show();
-                    SuccesssDialog();
-                    phongkho_table_list.removeAllViews();
-                    GetData(urlGetData);
-                }
-                else{
-                    Toast.makeText(PhongkhoLayout.this, "Lỗi Xoa!", Toast.LENGTH_SHORT).show();
-                    ErrorDialog();
-                }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Toast.makeText(PhongkhoLayout.this, "Xảy ra lỗi !", Toast.LENGTH_SHORT).show();
-                Log.d("AAA", "Lỗi! \n" + error.toString());
-                ErrorDialog();
-            }
-        }){
-            @Nullable
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                Map<String, String> params = new HashMap<>();
-                params.put("mapk",phongKho.getMapk().trim());
-                return params;
-            }
-        };
-        requestQueue.add(stringRequest);
-    }
-    private void GetData(String url){
-        phongkho_table_list.removeAllViews();
-        RequestQueue mRequestQueue = Volley.newRequestQueue(this);
-        //RequestFuture<JSONObject> future = RequestFuture.newFuture();
-        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
-            @Override
-            public void onResponse(JSONArray response) {
-                phongKhoArrayList.clear();
-                for (int i = 0; i < response.length(); i++){
-                    try {
-                        JSONObject jsonObject = response.getJSONObject(i);
-                        phongKhoArrayList.add(new PhongKho(jsonObject.getString("MaPK"),
-                                jsonObject.getString("TenPK"), jsonObject.getString("DiaChi"),jsonObject.getString("SDT")));
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-                TableRow tr = null;
-                for (int i = 0; i < phongKhoArrayList.size(); i++) {
-                    tr = createRow1(PhongkhoLayout.this, phongKhoArrayList.get(i));
-                    tr.setId((int) i);
-                    phongkho_table_list.addView(tr);
-                    setEventTableRows(tr, phongkho_table_list);
-                }
-            }
-        },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Toast.makeText(PhongkhoLayout.this, "Loi!", Toast.LENGTH_SHORT).show();
-
-                    }
-                }
-        );
-        mRequestQueue.add(jsonArrayRequest);
-    }
 }

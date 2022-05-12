@@ -1,8 +1,7 @@
 package com.example.myapplication.DB;
 
-
-
 import android.content.Context;
+import android.util.Base64;
 import android.util.Log;
 import android.widget.TableRow;
 import android.widget.Toast;
@@ -15,8 +14,8 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.example.myapplication.Entities.PhongKho;
-import com.example.myapplication.Main.PhongkhoLayout;
+import com.example.myapplication.Entities.VatTu;
+import com.example.myapplication.Main.VattuLayout;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -27,44 +26,17 @@ import java.util.HashMap;
 import java.util.Map;
 
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 
-public class PhongKhoDB extends AppCompatActivity {
-    public String urlGetData = "http://192.168.1.7:8080/androidwebservice/getdata.php";
-    public String urlInsert = "http://192.168.1.7:8080/androidwebservice/insert.php";
-    public String urlCapNhat = "http://192.168.1.7:8080/androidwebservice/update.php";
-    public String urlDelete = "http://192.168.1.7:8080/androidwebservice/delete.php";
-    public PhongKhoDB(){
+public class VatTuDB {
+    public String urlGetData = "http://192.168.1.7:8080/androidwebservice/VattuDB/getdata.php";
+    public String urlInsert = "http://192.168.1.7:8080/androidwebservice/VattuDB/insert.php";
+    public String urlCapNhat = "http://192.168.1.7:8080/androidwebservice/VattuDB/update.php";
+    public String urlDelete = "http://192.168.1.7:8080/androidwebservice/VattuDB/delete.php";
 
-    }
-    public void GetData(ArrayList<PhongKho> phongKhoArrayList, Context context,final VolleyCallBack callBack){
-        RequestQueue mRequestQueue = Volley.newRequestQueue(context);
-        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, urlGetData, null, new Response.Listener<JSONArray>() {
-            @Override
-            public void onResponse(JSONArray response) {
-                phongKhoArrayList.clear();
-                for (int i = 0; i < response.length(); i++){
-                    try {
-                        JSONObject jsonObject = response.getJSONObject(i);
-                        phongKhoArrayList.add(new PhongKho(jsonObject.getString("MaPK"),
-                                jsonObject.getString("TenPK"), jsonObject.getString("DiaChi"),jsonObject.getString("SDT")));
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-                callBack.onSuccess();
-            }
-        },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        callBack.onError(error.toString());
-                    }
-                }
-        );
-        mRequestQueue.add(jsonArrayRequest);
-    }
-    public void ThemPhongKho(PhongKho phongKho, Context context,final VolleyCallBack callBack){
+
+    public VatTuDB(){}
+    //API
+    public void ThemVatTu(VatTu vatTu, Context context,final VolleyCallBack callBack){
         RequestQueue mRequestQueue = Volley.newRequestQueue(context);
         StringRequest stringRequest = new StringRequest(Request.Method.POST, urlInsert, new Response.Listener<String>() {
             @Override
@@ -83,10 +55,17 @@ public class PhongKhoDB extends AppCompatActivity {
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> params = new HashMap<>();
-                params.put("mapk",phongKho.getMapk());
-                params.put("tenpk",phongKho.getTenpk());
-                params.put("diachi",phongKho.getDiachi());
-                params.put("sdt",phongKho.getSdt());
+                String mvt = vatTu.getMaVt();
+                String tvt = vatTu.getTenVt();
+                String dvt = vatTu.getDvt();
+                String gia = new String(vatTu.getHinh());
+                String hinh = vatTu.getGiaNhap();
+                final String imageString = Base64.encodeToString(vatTu.getHinh(), Base64.DEFAULT);
+                params.put("mavt",vatTu.getMaVt());
+                params.put("tenvt",vatTu.getTenVt());
+                params.put("dvt",vatTu.getDvt());
+                params.put("hinh",imageString);
+                params.put("gianhap",vatTu.getGiaNhap());
 
                 return params;
             }
@@ -94,33 +73,37 @@ public class PhongKhoDB extends AppCompatActivity {
         mRequestQueue.add(stringRequest);
 
     }
-    public void CapNhatPhongKho(PhongKho phongKho, Context context,final VolleyCallBack callBack){
+    public void CapNhatVatTu(VatTu vatTu, Context context,final VolleyCallBack callBack){
         RequestQueue requestQueue = Volley.newRequestQueue(context);
         StringRequest stringRequest = new StringRequest(Request.Method.POST, urlCapNhat, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 callBack.onSuccess(response);
+
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
                 callBack.onError(error.toString());
+
             }
         }){
             @Nullable
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> params = new HashMap<>();
-                params.put("mapk",phongKho.getMapk());
-                params.put("tenpk",phongKho.getTenpk());
-                params.put("diachi",phongKho.getDiachi());
-                params.put("sdt",phongKho.getSdt());
+                final String imageString = Base64.encodeToString(vatTu.getHinh(), Base64.DEFAULT);
+                params.put("mavt",vatTu.getMaVt());
+                params.put("tenvt",vatTu.getTenVt());
+                params.put("dvt",vatTu.getDvt());
+                params.put("hinh",imageString);
+                params.put("gianhap",vatTu.getGiaNhap());
                 return params;
             }
         };
         requestQueue.add(stringRequest);
     }
-    public void XoaPhongKho(PhongKho phongKho, Context context,final VolleyCallBack callBack){
+    public void XoaVatTu(VatTu vatTu, Context context,final VolleyCallBack callBack){
         RequestQueue requestQueue = Volley.newRequestQueue(context);
         StringRequest stringRequest = new StringRequest(Request.Method.POST, urlDelete, new Response.Listener<String>() {
             @Override
@@ -132,17 +115,48 @@ public class PhongKhoDB extends AppCompatActivity {
             @Override
             public void onErrorResponse(VolleyError error) {
                 callBack.onError(error.toString());
+
             }
         }){
             @Nullable
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> params = new HashMap<>();
-                params.put("mapk",phongKho.getMapk().trim());
+                params.put("mavt",vatTu.getMaVt().trim());
                 return params;
             }
         };
         requestQueue.add(stringRequest);
+    }
+    public void GetData(ArrayList<VatTu> vatTuArrayList, Context context,final VolleyCallBack callBack){
+
+        RequestQueue mRequestQueue = Volley.newRequestQueue(context);
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, urlGetData, null, new Response.Listener<JSONArray>() {
+            @Override
+            public void onResponse(JSONArray response) {
+                vatTuArrayList.clear();
+                for (int i = 0; i < response.length(); i++){
+                    try {
+                        JSONObject jsonObject = response.getJSONObject(i);
+                        vatTuArrayList.add(new VatTu(jsonObject.getString("MaVT"),
+                                jsonObject.getString("TenVT"), jsonObject.getString("Dvt"),
+                                jsonObject.getString("GiaNhap"),Base64.decode(jsonObject.getString("Hinh"), Base64.DEFAULT)));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+                callBack.onSuccess();
+            }
+        },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(context, "Loi!", Toast.LENGTH_SHORT).show();
+
+                    }
+                }
+        );
+        mRequestQueue.add(jsonArrayRequest);
     }
     public interface VolleyCallBack {
         void onSuccess();

@@ -23,8 +23,8 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
-import com.example.myapplication.Databases.NhanVienDatabase;
-import com.example.myapplication.Databases.PhongKhoDatabase;
+import com.example.myapplication.DB.NhanVienDB;
+import com.example.myapplication.DB.PhongKhoDB;
 import com.example.myapplication.Entities.NhanVien;
 import com.example.myapplication.Entities.PhongKho;
 import com.example.myapplication.R;
@@ -81,11 +81,11 @@ public class NhanvienLayout extends AppCompatActivity {
     TextView showLabel;
 
     // Database Controller
-    NhanVienDatabase nhanvienDB;
-    PhongKhoDatabase phongkhoDB;
+    NhanVienDB nhanvienDB;
+    PhongKhoDB phongkhoDB;
 
-    List<PhongKho> phongkholist;
-    List<NhanVien> nhanvienlist;
+    ArrayList<PhongKho> phongkholist;
+    ArrayList<NhanVien> nhanvienlist;
 
     // Focus
     int indexofRow = -1;
@@ -173,27 +173,56 @@ public class NhanvienLayout extends AppCompatActivity {
 
     public void loadDatabase() {
         Log.d("data", "Load Database --------");
-        nhanvienDB = new NhanVienDatabase(NhanvienLayout.this);
-        phongkhoDB = new PhongKhoDatabase(NhanvienLayout.this);
+        nhanvienDB = new NhanVienDB();
+        phongkhoDB = new PhongKhoDB();
         nhanvienlist = new ArrayList<>();
+        phongkholist = new ArrayList<>();
         setCursorWindowImageSize(100 * 1024 * 1024);
-        TableRow tr = null;
-        nhanvienlist = nhanvienDB.select();
-        // Tag sẽ bắt đầu ở 1 vì phải cộng thêm thằng example đã có sẵn
-        for (int i = 0; i < nhanvienlist.size(); i++) {
-            Log.d("data", nhanvienlist.get(i).toString());
-            tr = createRow(this, nhanvienlist.get(i));
-            tr.setId((int) i + 1);
-            nhanvien_table_list.addView(tr);
-        }
+        nhanvienDB.GetData(nhanvienlist, this, new NhanVienDB.VolleyCallBack() {
+            @Override
+            public void onSuccess() {
+                TableRow tr = null;
+                for (int i = 0; i < nhanvienlist.size(); i++) {
+                    Log.d("data", nhanvienlist.get(i).toString());
+                    tr = createRow(NhanvienLayout.this, nhanvienlist.get(i));
+                    tr.setId((int) i + 1);
+                    nhanvien_table_list.addView(tr);
+                }
+            }
 
-        phongkholist = phongkhoDB.select();
-        ArrayList<String> PK_name = new ArrayList<>();
-        PK_name.add("Tất cả phòng kho");
-        for (PhongKho pk : phongkholist) {
-            PK_name.add(pk.getTenpk());
-        }
-        PK_spinner.setAdapter(loadSpinnerAdapter(PK_name));
+            @Override
+            public void onError(String error) {
+
+            }
+
+            @Override
+            public void onSuccess(String response) {
+
+            }
+        });
+
+        phongkhoDB.GetData(phongkholist, this, new PhongKhoDB.VolleyCallBack() {
+            @Override
+            public void onSuccess() {
+                ArrayList<String> PK_name = new ArrayList<>();
+                PK_name.add("Tất cả phòng kho");
+                for (PhongKho pk : phongkholist) {
+                    PK_name.add(pk.getTenpk());
+                }
+                PK_spinner.setAdapter(loadSpinnerAdapter(PK_name));
+            }
+
+            @Override
+            public void onError(String error) {
+
+            }
+
+            @Override
+            public void onSuccess(String response) {
+
+            }
+        });
+
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -560,7 +589,7 @@ public class NhanvienLayout extends AppCompatActivity {
 //                        Log.d("process",PB_spinner_maPB.trim()+"");
 //                        Log.d("process",strDate.trim()+"");
 //                        Log.d("process",nv.toString());
-                        if (nhanvienDB.insert(nv) == -1) break;
+//                        if (nhanvienDB.insert(nv) == -1) break;
 //                        Log.d("process","2True");
                         TableRow tr = createRow(NhanvienLayout.this, nv);
                         int n = nhanvien_table_list.getChildCount();
@@ -605,7 +634,7 @@ public class NhanvienLayout extends AppCompatActivity {
 //                        Log.d("process",PB_spinner_maPB.trim()+"");
 //                        Log.d("process",strDate.trim()+"");
 //                        Log.d("process",nv.toString());
-                        if (nhanvienDB.update(nv) == -1) break;
+//                        if (nhanvienDB.update(nv) == -1) break;
 //                        Log.d("process","2True");
                         //   Cập nhật nhân viên list bằng cách lấy cái index ra và add vào cái index đó
                         int index = 0;
@@ -656,7 +685,7 @@ public class NhanvienLayout extends AppCompatActivity {
                                 formatDate(focusNSNV.getText().toString().trim(), true),
                                 focusPKNV.trim());
                         boolean del = false;
-                        if (nhanvienDB.delete(nv) == -1) break;
+//                        if (nhanvienDB.delete(nv) == -1) break;
 //                        Log.d("process","1True");
 //                        Log.d("process",nv.toString());
                         if (indexofRow == nhanvien_table_list.getChildCount() - 1) {
