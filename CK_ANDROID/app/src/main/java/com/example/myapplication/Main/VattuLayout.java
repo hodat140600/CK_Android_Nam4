@@ -28,6 +28,7 @@ import android.widget.Toast;
 
 import com.example.myapplication.DB.VatTuDB;
 import com.example.myapplication.Entities.VatTu;
+import com.example.myapplication.Notification;
 import com.example.myapplication.R;
 
 import java.io.ByteArrayOutputStream;
@@ -114,6 +115,7 @@ public class VattuLayout extends AppCompatActivity {
     String urlCapNhat = "http://192.168.1.9:8080/androidwebservice/VattuDB/update.php";
     String urlDelete = "http://192.168.1.9:8080/androidwebservice/VattuDB/delete.php";
     ArrayList<VatTu> vatTuArrayList;
+    Notification notification = new Notification();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -567,6 +569,8 @@ public class VattuLayout extends AppCompatActivity {
                                     Toast.makeText(VattuLayout.this, "Them Thanh Cong!", Toast.LENGTH_SHORT).show();
                                     loadDatabase();
                                     SuccesssDialog();
+                                    notification.SendNotification(VattuLayout.this, showResult.getText().toString(),
+                                            showLabel.getText().toString() + " " + vt.getTenVt());
                                 }else{
                                     Toast.makeText(VattuLayout.this, "That Bai!", Toast.LENGTH_SHORT).show();
                                     ErrorDialog();
@@ -611,6 +615,8 @@ public class VattuLayout extends AppCompatActivity {
                                 if (response.trim().equalsIgnoreCase("success")){
                                     SuccesssDialog();
                                     loadDatabase();
+                                    notification.SendNotification(VattuLayout.this, showResult.getText().toString(),
+                                            showLabel.getText().toString() + " " + vt.getTenVt());
                                 }
                                 else{
                                     ErrorDialog();
@@ -624,14 +630,15 @@ public class VattuLayout extends AppCompatActivity {
                     }
                     break;
                     case R.id.VT_delBtn: {
-                        vattuDB.XoaVatTu(
-                                new VatTu(
-                                        focusMaVT.getText().toString().trim() + "",
-                                        focusTenVT.getText().toString().trim() + "",
-                                        focusDVT.getText().toString().trim() + "",
-                                        focusGia.getText().toString().trim() + "",
-                                        focusDataHinh
-                                ), VattuLayout.this, new VatTuDB.VolleyCallBack() {
+                        VatTu vt = new VatTu(
+                                focusMaVT.getText().toString().trim() + "",
+                                focusTenVT.getText().toString().trim() + "",
+                                focusDVT.getText().toString().trim() + "",
+                                focusGia.getText().toString().trim() + "",
+                                focusDataHinh
+                        );
+                        vattuDB.XoaVatTu(vt
+                                , VattuLayout.this, new VatTuDB.VolleyCallBack() {
                                     @Override
                                     public void onSuccess() {
 
@@ -650,6 +657,8 @@ public class VattuLayout extends AppCompatActivity {
                                             Toast.makeText(VattuLayout.this, "Xoa Thành Công!", Toast.LENGTH_SHORT).show();
                                             SuccesssDialog();
                                             loadDatabase();
+                                            notification.SendNotification(VattuLayout.this, showResult.getText().toString(),
+                                                    showLabel.getText().toString() + " " + vt.getTenVt());
                                         }
                                         else{
                                             Toast.makeText(VattuLayout.this, "Lỗi Xoa!", Toast.LENGTH_SHORT).show();

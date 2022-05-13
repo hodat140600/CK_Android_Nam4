@@ -21,6 +21,7 @@ import android.widget.Toast;
 
 import com.example.myapplication.DB.PhongKhoDB;
 import com.example.myapplication.Entities.PhongKho;
+import com.example.myapplication.Notification;
 import com.example.myapplication.R;
 
 import java.lang.reflect.Field;
@@ -87,6 +88,7 @@ public class PhongkhoLayout extends AppCompatActivity {
     String urlCapNhat = "http://192.168.1.9:8080/androidwebservice/update.php";
     String urlDelete = "http://192.168.1.9:8080/androidwebservice/delete.php";
     ArrayList<PhongKho> phongKhoArrayList;
+    Notification notification;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -324,7 +326,7 @@ public class PhongkhoLayout extends AppCompatActivity {
     // Load from the Database to the Table Layout
     public void loadDatabase() {
         setCursorWindowImageSize(100 * 1024* 1024);
-
+        notification = new Notification();
         phongkhoDB = new PhongKhoDB();
         phongKhoArrayList = new ArrayList<>();
         phongkho_table_list.removeAllViews();
@@ -428,6 +430,8 @@ public class PhongkhoLayout extends AppCompatActivity {
                                     SuccesssDialog();
                                     phongkho_table_list.removeAllViews();
                                     loadDatabase();
+                                    notification.SendNotification(PhongkhoLayout.this, showResult.getText().toString(),
+                                            showLabel.getText().toString() + " " + pk.getTenpk());
                                 }else {
                                     Toast.makeText(PhongkhoLayout.this,"That bai!", Toast.LENGTH_SHORT).show();
                                     ErrorDialog();
@@ -449,9 +453,10 @@ public class PhongkhoLayout extends AppCompatActivity {
                         TableRow tr = (TableRow) phongkho_table_list.getChildAt(indexofRow);
                         TextView id = (TextView) tr.getChildAt(0);
                         TextView name = (TextView) tr.getChildAt(1);
-                        phongkhoDB.CapNhatPhongKho(new PhongKho(id.getText().toString().trim(),
+                        PhongKho pk = new PhongKho(id.getText().toString().trim(),
                                 inputTenPK.getText().toString().trim(), inputDiaChi.getText().toString().trim(),
-                                inputSDT.getText().toString().trim()), PhongkhoLayout.this, new PhongKhoDB.VolleyCallBack() {
+                                inputSDT.getText().toString().trim());
+                        phongkhoDB.CapNhatPhongKho(pk, PhongkhoLayout.this, new PhongKhoDB.VolleyCallBack() {
                             @Override
                             public void onSuccess() {
 
@@ -467,6 +472,8 @@ public class PhongkhoLayout extends AppCompatActivity {
                                 if (response.trim().equalsIgnoreCase("success")){
                                     SuccesssDialog();
                                     loadDatabase();
+                                    notification.SendNotification(PhongkhoLayout.this, showResult.getText().toString(),
+                                            showLabel.getText().toString() + " " + pk.getTenpk());
                                 }
                                 else{
                                     ErrorDialog();
@@ -478,9 +485,10 @@ public class PhongkhoLayout extends AppCompatActivity {
                     case R.id.PK_delBtn: {
                         TableRow tr = (TableRow) phongkho_table_list.getChildAt(indexofRow);
                         TextView id = (TextView) tr.getChildAt(0);
-                        phongkhoDB.XoaPhongKho(new PhongKho(id.getText().toString().trim(),
+                        PhongKho pk = new PhongKho(id.getText().toString().trim(),
                                 inputTenPK.getText().toString().trim(), inputDiaChi.getText().toString().trim(),
-                                inputSDT.getText().toString().trim()), PhongkhoLayout.this, new PhongKhoDB.VolleyCallBack() {
+                                inputSDT.getText().toString().trim());
+                        phongkhoDB.XoaPhongKho(pk, PhongkhoLayout.this, new PhongKhoDB.VolleyCallBack() {
                             @Override
                             public void onSuccess() {
 
@@ -499,6 +507,8 @@ public class PhongkhoLayout extends AppCompatActivity {
                                     Toast.makeText(PhongkhoLayout.this, "Xoa Thành Công!", Toast.LENGTH_SHORT).show();
                                     SuccesssDialog();
                                     loadDatabase();
+                                    notification.SendNotification(PhongkhoLayout.this, showResult.getText().toString(),
+                                            showLabel.getText().toString() + " " + pk.getTenpk());
                                 }
                                 else{
                                     Toast.makeText(PhongkhoLayout.this, "Lỗi Xoa!", Toast.LENGTH_SHORT).show();

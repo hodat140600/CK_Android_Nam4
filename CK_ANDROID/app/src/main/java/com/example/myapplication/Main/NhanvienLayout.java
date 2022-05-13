@@ -29,6 +29,7 @@ import com.example.myapplication.DB.PhongKhoDB;
 import com.example.myapplication.Entities.NhanVien;
 import com.example.myapplication.Entities.PhongKho;
 import com.example.myapplication.JavaMailAPI;
+import com.example.myapplication.Notification;
 import com.example.myapplication.R;
 
 import java.lang.reflect.Field;
@@ -116,6 +117,7 @@ public class NhanvienLayout extends AppCompatActivity {
 
     // Other
     float scale;
+    Notification notification = new Notification();
 
     @Override
     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -745,6 +747,8 @@ public class NhanvienLayout extends AppCompatActivity {
                                     focusTenNV = null;
                                     focusNSNV = null;
                                     focusPKNV = "";
+                                    notification.SendNotification(NhanvienLayout.this, showResult.getText().toString(),
+                                            showLabel.getText().toString() + " " + nv.getHoTen());
                                 }else {
                                     Toast.makeText(NhanvienLayout.this,"That bai!", Toast.LENGTH_SHORT).show();
                                     ErrorDialog();
@@ -819,6 +823,8 @@ public class NhanvienLayout extends AppCompatActivity {
                                             }
                                         }
                                     }
+                                    notification.SendNotification(NhanvienLayout.this, showResult.getText().toString(),
+                                            showLabel.getText().toString() + " " + nv.getHoTen());
                                 }else {
                                     Toast.makeText(NhanvienLayout.this,"That bai!", Toast.LENGTH_SHORT).show();
                                     ErrorDialog();
@@ -872,6 +878,8 @@ public class NhanvienLayout extends AppCompatActivity {
                                 focusTenNV = null;
                                 focusNSNV = null;
                                 focusPKNV = "";
+                                    notification.SendNotification(NhanvienLayout.this, showResult.getText().toString(),
+                                            showLabel.getText().toString() + " " + nv.getHoTen());
                                 }else {
                                     Toast.makeText(NhanvienLayout.this,"That bai!", Toast.LENGTH_SHORT).show();
                                     ErrorDialog();

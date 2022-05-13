@@ -29,6 +29,7 @@ import com.example.myapplication.DB.PhieuNhapDB;
 import com.example.myapplication.DB.PhongKhoDB;
 import com.example.myapplication.Entities.PhieuNhap;
 import com.example.myapplication.Entities.PhongKho;
+import com.example.myapplication.Notification;
 import com.example.myapplication.R;
 
 
@@ -98,6 +99,7 @@ public class PhieuNhapLayout extends AppCompatActivity {
 
     // Other
     float scale;
+    Notification notification = new Notification();
 
     @Override
     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -576,6 +578,8 @@ public class PhieuNhapLayout extends AppCompatActivity {
                                     SuccesssDialog();
                                     phieunhap_table_list.removeAllViews();
                                     loadDatabase();
+                                    notification.SendNotification(PhieuNhapLayout.this, showResult.getText().toString(),
+                                            showLabel.getText().toString() + " " + pn.getSoPhieu());
                                 }else {
                                     Toast.makeText(PhieuNhapLayout.this, "That bai!", Toast.LENGTH_SHORT).show();
                                     ErrorDialog();
@@ -615,6 +619,8 @@ public class PhieuNhapLayout extends AppCompatActivity {
                                 if (response.trim().equalsIgnoreCase("success")){
                                     SuccesssDialog();
                                     loadDatabase();
+                                    notification.SendNotification(PhieuNhapLayout.this, showResult.getText().toString(),
+                                            showLabel.getText().toString() + " " + pn.getSoPhieu());
                                 }
                                 else{
                                     ErrorDialog();
@@ -647,6 +653,8 @@ public class PhieuNhapLayout extends AppCompatActivity {
                                     Toast.makeText(PhieuNhapLayout.this, "Xoa Thành Công!", Toast.LENGTH_SHORT).show();
                                     SuccesssDialog();
                                     loadDatabase();
+                                    notification.SendNotification(PhieuNhapLayout.this, showResult.getText().toString(),
+                                            showLabel.getText().toString() + " " + pn.getSoPhieu());
                                 }
                                 else{
                                     Toast.makeText(PhieuNhapLayout.this, "Lỗi Xoa!", Toast.LENGTH_SHORT).show();

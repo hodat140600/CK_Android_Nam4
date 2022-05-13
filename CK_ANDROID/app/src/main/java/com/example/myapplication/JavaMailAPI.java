@@ -118,7 +118,4 @@ public class JavaMailAPI extends AsyncTask<Void,Void,Void>  {
         }
         return null;
     }
-    public interface MailCallBack{
-        void OnSuccess();
-    }
 }

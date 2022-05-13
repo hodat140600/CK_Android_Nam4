@@ -38,6 +38,7 @@ import com.example.myapplication.Entities.PhieuNhap;
 import com.example.myapplication.Entities.PhongKho;
 import com.example.myapplication.Entities.Rows;
 import com.example.myapplication.Entities.VatTu;
+import com.example.myapplication.Notification;
 import com.example.myapplication.R;
 import com.example.myapplication.Statistics.BaoCaoLayout;
 import com.example.myapplication.Statistics.ThongKeLayout;
@@ -146,6 +147,7 @@ public class ChiTietPhieuNhapLayout extends AppCompatActivity {
     // Other
     float scale;
     int indexofRow;
+    Notification notification = new Notification();
     List<String> listAll;
     List<String> listIndex;
     List<String> listPnIndexPK;
@@ -1045,6 +1047,8 @@ public class ChiTietPhieuNhapLayout extends AppCompatActivity {
                                 if(response.trim().equals("Success")){
                                     Toast.makeText(ChiTietPhieuNhapLayout.this, "Them thanh cong!", Toast.LENGTH_SHORT).show();
                                     SuccesssDialog();
+                                    notification.SendNotification(ChiTietPhieuNhapLayout.this, showResult.getText().toString(),
+                                            showLabel.getText().toString() + " " + ctpn.getSoPhieu());
                                 }else {
                                     Toast.makeText(ChiTietPhieuNhapLayout.this,"That bai!", Toast.LENGTH_SHORT).show();
                                     ErrorDialog();
@@ -1088,6 +1092,8 @@ public class ChiTietPhieuNhapLayout extends AppCompatActivity {
                             public void onSuccess(String response) {
                                 if (response.trim().equalsIgnoreCase("success")){
                                     SuccesssDialog();
+                                    notification.SendNotification(ChiTietPhieuNhapLayout.this, showResult.getText().toString(),
+                                            showLabel.getText().toString() + " " + ctpn.getSoPhieu());
                                 }
                                 else{
                                     ErrorDialog();
@@ -1134,6 +1140,8 @@ public class ChiTietPhieuNhapLayout extends AppCompatActivity {
                                 if (response.trim().equalsIgnoreCase("success")){
                                     Toast.makeText(ChiTietPhieuNhapLayout.this, "Xoa Thành Công!", Toast.LENGTH_SHORT).show();
                                     SuccesssDialog();
+                                    notification.SendNotification(ChiTietPhieuNhapLayout.this, showResult.getText().toString(),
+                                            showLabel.getText().toString() + " " + ctpn.getSoPhieu());
                                 }
                                 else{
                                     Toast.makeText(ChiTietPhieuNhapLayout.this, "Lỗi Xoa!", Toast.LENGTH_SHORT).show();
