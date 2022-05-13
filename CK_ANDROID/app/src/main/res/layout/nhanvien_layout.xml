@@ -186,9 +186,23 @@
             android:orientation="horizontal"
             android:gravity="right">
             <Button
+                android:id="@+id/NV_mailBtn"
+                style="@style/Btn"
+                android:layout_marginRight="5dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Mail"
+                android:textColor="#000"
+                android:backgroundTint="#ECC91B"
+                app:icon="@drawable/iconmail"
+                app:iconGravity="textStart"
+                app:iconPadding="5dp"
+                app:iconTint="#000"
+                />
+            <Button
                 style="@style/Btn"
                 android:id="@+id/NV_navbar_capphat"
-                android:text="Chi tiết PN"
+                android:text="CT PN"
                 android:backgroundTint="@color/disable_color"
                 android:textColor="@color/black"
                 />

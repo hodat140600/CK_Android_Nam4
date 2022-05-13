@@ -16,7 +16,7 @@
         android:orientation="horizontal"
         >
         <Button
-            android:id="@+id/NV_backBtn"
+            android:id="@+id/NV_backMailBtn"
             android:layout_width="wrap_content"
             android:layout_height="fill_parent"
             android:drawableLeft="@drawable/baseline_arrow_back_ios_black_18"
@@ -26,12 +26,12 @@
     </LinearLayout>
 
     <TextView
-        android:id="@+id/NV_showLabel"
+        android:id="@+id/NV_showMailLabel"
         style="@style/textBlack"
         android:layout_width="match_parent"
         android:background="#2A91E1"
         android:gravity="center|center_vertical"
-        android:text="Thêm nhân viên"
+        android:text="Gửi Mail"
         android:textAllCaps="true"
         android:textSize="24dp" />
 
@@ -50,28 +50,27 @@
                 android:orientation="vertical">
                 <TextView
                     style="@style/textBlack"
-                    android:text="@string/ten_pk"
+                    android:text="Email"
                     android:padding="10dp"
                     />
                 <com.chivorn.smartmaterialspinner.SmartMaterialSpinner
-                    android:id="@+id/NV_PKSpinner_mini"
+                    android:id="@+id/NV_EmailSpinner_mini"
                     android:layout_width="match_parent"
                     android:layout_marginHorizontal="10dp"
                     android:layout_height="wrap_content"
                     app:smsp_isSearchable="true"
-                    app:smsp_searchHeaderText="Tên Phòng kho"
-                    app:smsp_hint="Tên phòng kho"
+                    app:smsp_searchHeaderText="Email"
+                    app:smsp_hint="Email Nhân Viên"
                     />
                 <TextView
                     style="@style/textRed"
-                    android:id="@+id/NV_showMPKError"
-                    android:visibility="invisible"
+                    android:id="@+id/NV_showEmailError"
                     android:layout_width="match_parent"
                     android:text="@string/error_of_this_line"
                     android:gravity="center"
                     android:layout_marginTop="10dp"
+                    android:visibility="invisible"
                     />
-
             </LinearLayout>
             <LinearLayout
                 android:layout_marginTop="10dp"
@@ -81,23 +80,23 @@
                 android:orientation="vertical">
                 <TextView
                     style="@style/textBlack"
-                    android:text="@string/ma_nv"
+                    android:text="Tiêu đề"
                     android:padding="10dp"
                     />
                 <EditText
-                    android:id="@+id/NV_inputMaNV"
+                    android:id="@+id/NV_inputSubject"
                     android:paddingLeft="10dp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     />
                 <TextView
                     style="@style/textRed"
-                    android:id="@+id/NV_showMNVError"
-                    android:visibility="invisible"
+                    android:id="@+id/NV_showSubjectError"
                     android:layout_width="match_parent"
                     android:text="@string/error_of_this_line"
                     android:gravity="center"
                     android:layout_marginTop="10dp"
+                    android:visibility="invisible"
                     />
             </LinearLayout>
             <LinearLayout
@@ -108,73 +107,24 @@
                 android:orientation="vertical">
                 <TextView
                     style="@style/textBlack"
-                    android:text="@string/ten_nv"
+                    android:text="Nội dung"
                     android:padding="10dp"
                     />
                 <EditText
-                    android:id="@+id/NV_inputTenNV"
+                    android:id="@+id/NV_inputMessage"
                     android:paddingLeft="10dp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     />
                 <TextView
                     style="@style/textRed"
-                    android:id="@+id/NV_showTNVError"
+                    android:id="@+id/NV_showMessageError"
                     android:layout_width="match_parent"
                     android:text="@string/error_of_this_line"
                     android:gravity="center"
                     android:layout_marginTop="10dp"
                     android:visibility="invisible"
                     />
-            </LinearLayout>
-            <LinearLayout
-                android:layout_marginTop="10dp"
-                android:layout_marginHorizontal="10dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-                <TextView
-                    style="@style/textBlack"
-                    android:text="Email"
-                    android:padding="10dp"
-                    />
-                <EditText
-                    android:id="@+id/NV_inputMailNV"
-                    android:paddingLeft="10dp"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    />
-                <TextView
-                    style="@style/textRed"
-                    android:id="@+id/NV_showMailNVError"
-                    android:layout_width="match_parent"
-                    android:text="@string/error_of_this_line"
-                    android:gravity="center"
-                    android:layout_marginTop="10dp"
-                    android:visibility="invisible"
-                    />
-            </LinearLayout>
-            <LinearLayout
-                android:layout_marginTop="10dp"
-                android:layout_marginHorizontal="10dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-                <TextView
-                    style="@style/textBlack"
-                    android:text="@string/ngay_sinh"
-                    android:padding="10dp"
-                    />
-
-                <DatePicker
-                    android:id="@+id/NV_inputNS"
-                    android:layout_width="match_parent"
-                    android:layout_height="139dp"
-                    android:layout_gravity="center"
-                    android:layout_marginTop="16dp"
-                    android:calendarViewShown="false"
-                    android:datePickerMode="spinner" />
-
             </LinearLayout>
         </LinearLayout>
     </ScrollView>
@@ -182,9 +132,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <TextView
-            android:id="@+id/NV_showConfirm"
+            android:id="@+id/NV_showMailConfirm"
             style="@style/textBlack"
-            android:text="Bạn thực sự muốn tạo mới ?"
+            android:text="Bạn thực sự muốn gửi mail ?"
             android:layout_width="match_parent"
             android:gravity="center"
             android:textSize="18dp"
@@ -200,14 +150,14 @@
         android:layout_gravity="bottom">
         <Button
             style="@style/Btn"
-            android:id="@+id/NV_yesInsertBtn"
+            android:id="@+id/NV_yesMailInsertBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:backgroundTint="@color/yes_color"
             android:text="Đồng ý"/>
         <Button
             android:layout_marginLeft="40dp"
-            android:id="@+id/NV_noInsertBtn"
+            android:id="@+id/NV_noMailInsertBtn"
             style="@style/Btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -215,7 +165,7 @@
             android:text="Hủy"/>
     </LinearLayout>
     <TextView
-        android:id="@+id/NV_showResult"
+        android:id="@+id/NV_showMailResult"
         android:visibility="invisible"
         android:layout_marginTop="10dp"
         style="@style/textBlack"
@@ -223,6 +173,6 @@
         android:textColor="@color/yes_color"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Thêm mới thành công"
+        android:text="Gửi mail thành công"
         />
 </LinearLayout>

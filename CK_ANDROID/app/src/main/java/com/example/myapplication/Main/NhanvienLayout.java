@@ -28,6 +28,7 @@ import com.example.myapplication.DB.NhanVienDB;
 import com.example.myapplication.DB.PhongKhoDB;
 import com.example.myapplication.Entities.NhanVien;
 import com.example.myapplication.Entities.PhongKho;
+import com.example.myapplication.JavaMailAPI;
 import com.example.myapplication.R;
 
 import java.lang.reflect.Field;
@@ -47,6 +48,7 @@ public class NhanvienLayout extends AppCompatActivity {
     Button insertBtn;
     Button editBtn;
     Button delBtn;
+    Button mailBtn;
     Button exitBtn;
 
     // Navigation
@@ -58,33 +60,47 @@ public class NhanvienLayout extends AppCompatActivity {
 
     // Dialog Layout
     Dialog nhanviendialog;
+    Dialog maildialog;
 
     Button backBtn;
     Button yesBtn;
     Button noBtn;
 
+    Button backMailBtn;
+    Button yesMailBtn;
+    Button noMailBtn;
+
     EditText NV_searchView;
 
     Spinner PK_spinner_mini;
+    Spinner Mail_spinner_mini;
 
     EditText inputMaNV;
     EditText inputTenNV;
     EditText inputMailNV;
 
+    EditText inputsubMail, inputmessMail;
+
     DatePicker datepickerNSNV;
 
     String PK_spinner_mini_maPK;
+    String NV_spinner_mini_mail;
     String strDate;
 
+    TextView showMPKError;
     TextView showMNVError;
     TextView showTNVError;
     TextView showResult;
     TextView showConfirm;
     TextView showLabel;
 
+    TextView showEmailError, showSubjectError, showMessageError;
+
     // Database Controller
     NhanVienDB nhanvienDB;
     PhongKhoDB phongkhoDB;
+
+    ArrayList<String> email = new ArrayList<>();
 
     ArrayList<PhongKho> phongkholist;
     ArrayList<NhanVien> nhanvienlist;
@@ -166,6 +182,7 @@ public class NhanvienLayout extends AppCompatActivity {
         insertBtn = findViewById(R.id.NV_insertBtn);
         editBtn = findViewById(R.id.NV_editBtn);
         delBtn = findViewById(R.id.NV_delBtn);
+        mailBtn = findViewById(R.id.NV_mailBtn);
         exitBtn = findViewById(R.id.NV_exitBtn);
 
         navPK = findViewById(R.id.NV_navbar_phongkho);
@@ -263,6 +280,7 @@ public class NhanvienLayout extends AppCompatActivity {
             }
 
         });
+        // navPN
         navPN.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -377,13 +395,17 @@ public class NhanvienLayout extends AppCompatActivity {
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     public void setEventTable(TableLayout list) {
-        // Log.d("count", list.getChildCount()+""); // số table rows + 1
-        // Không cần thay đổi vì đây chỉ mới set Event
-        // Do có thêm 1 thằng example để làm gốc, nên số row thì luôn luôn phải + 1
-        // Có example thì khi thêm row thì nó sẽ theo khuôn
         for (int i = 0; i < list.getChildCount(); i++) {
             setEventTableRows((TableRow) list.getChildAt(i), list);
         }
+        mailBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                createMailDialog(R.layout.popup_sendemail);
+                setControlMailDialog();
+                setEventMailDialog();
+            }
+        });
         // Khi tạo, dùng n làm tag để thêm row
         insertBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -394,11 +416,7 @@ public class NhanvienLayout extends AppCompatActivity {
                 setControlDialog();
                 // Event
                 strDate = formatDate(InttoStringDate(30, 8, 1999), true);
-//                Toast.makeText( NhanvienLayout.this, strDate+"", Toast.LENGTH_LONG).show();
                 setEventDialog(v);
-//                Log.d("date",strDate+"");
-
-                // Right to Select spinner
             }
         });
         // Khi edit
@@ -406,16 +424,11 @@ public class NhanvienLayout extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (indexofRow != -1) {
-                    // Test
-                    // Toast.makeText( PhongbanLayout.this, focusRowID+"", Toast.LENGTH_LONG).show();
                     createDialog(R.layout.popup_nhanvien);
-                    // Control
                     setControlDialog();
                     showLabel.setText("Sửa thông tin nhân viên");
                     showConfirm.setText("Bạn có muốn sửa hàng này không?");
-                    // Event
                     setEventDialog(v);
-                    // Right to Select spinner
                     int index = 0;
                     for (int i = 0; i < phongkholist.size(); i++) {
                         // Nếu thằng được focus có mã PB trùng với PB trong list thì break
@@ -425,7 +438,6 @@ public class NhanvienLayout extends AppCompatActivity {
                         }
                     }
                     int[] date = StringtoIntDate(focusNSNV.getText().toString().trim());
-
                     PK_spinner_mini.setSelection(index);
                     inputMaNV.setText(focusMaNV.getText());
                     inputTenNV.setText(focusTenNV.getText());
@@ -436,7 +448,6 @@ public class NhanvienLayout extends AppCompatActivity {
                     }
                     datepickerNSNV.updateDate(date[2], date[1] - 1, date[0]);
                     inputMaNV.setEnabled(false);
-
                 }
             }
         });
@@ -483,6 +494,7 @@ public class NhanvienLayout extends AppCompatActivity {
             }
         });
 
+
     }
 
     // To set all rows to normal state, set focusRowid = -1
@@ -494,7 +506,6 @@ public class NhanvienLayout extends AppCompatActivity {
             if (indexofRow != (int) row.getId())
                 row.setBackgroundColor(getResources().getColor(R.color.white));
         }
-//        Toast.makeText(NhanvienLayout.this, indexofRow + ":" + (int) list.getChildAt(indexofRow).getId() + "", Toast.LENGTH_LONG).show();
     }
 
     public void setEventTableRows(TableRow tr, TableLayout list) {
@@ -523,6 +534,13 @@ public class NhanvienLayout extends AppCompatActivity {
         nhanviendialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         nhanviendialog.show();
     }
+    public void createMailDialog(int layout){
+        maildialog = new Dialog(this);
+        maildialog.setContentView(layout);
+        maildialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        maildialog.show();
+    }
+
 
     public void setEventSpinnerMini() {
         PK_spinner_mini.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -535,6 +553,19 @@ public class NhanvienLayout extends AppCompatActivity {
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
                 PK_spinner_mini_maPK = phongkholist.get(0).getMapk();
+            }
+        });
+    }
+    public void setEventMailSpinnerMini() {
+        Mail_spinner_mini.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                NV_spinner_mini_mail = email.get(position).trim();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                NV_spinner_mini_mail = email.get(0);
             }
         });
     }
@@ -574,6 +605,7 @@ public class NhanvienLayout extends AppCompatActivity {
 
         setEventDatePicker();
 
+        showMPKError = nhanviendialog.findViewById(R.id.NV_showMPKError);
         showMNVError = nhanviendialog.findViewById(R.id.NV_showMNVError);
         showTNVError = nhanviendialog.findViewById(R.id.NV_showTNVError);
 
@@ -581,7 +613,67 @@ public class NhanvienLayout extends AppCompatActivity {
         showConfirm = nhanviendialog.findViewById(R.id.NV_showConfirm);
         showLabel = nhanviendialog.findViewById(R.id.NV_showLabel);
     }
+    public void setControlMailDialog(){
+        backMailBtn = maildialog.findViewById(R.id.NV_backMailBtn);
+        yesMailBtn = maildialog.findViewById(R.id.NV_yesMailInsertBtn);
+        noMailBtn = maildialog.findViewById(R.id.NV_noMailInsertBtn);
 
+        Mail_spinner_mini = maildialog.findViewById(R.id.NV_EmailSpinner_mini);
+        email.clear();
+        for(NhanVien nv : nhanvienlist){
+            String mail = nv.getEmail().trim();
+            boolean check = !mail.equalsIgnoreCase("null") && !mail.isEmpty();
+            if(check){
+                email.add(mail);
+            }
+        }
+        Mail_spinner_mini.setAdapter(loadSpinnerAdapter(email));
+        setEventMailSpinnerMini();
+        inputsubMail = maildialog.findViewById(R.id.NV_inputSubject);
+        inputmessMail = maildialog.findViewById(R.id.NV_inputMessage);
+
+        showEmailError = maildialog.findViewById(R.id.NV_showEmailError);
+        showSubjectError = maildialog.findViewById(R.id.NV_showSubjectError);
+        showMessageError = maildialog.findViewById(R.id.NV_showMessageError);
+
+        showResult = maildialog.findViewById(R.id.NV_showMailResult);
+        showConfirm = maildialog.findViewById(R.id.NV_showMailConfirm);
+        showLabel = maildialog.findViewById(R.id.NV_showMailLabel);
+    }
+    public void setEventMailDialog(){
+        backMailBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                maildialog.dismiss();
+            }
+        });
+        noMailBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                maildialog.dismiss();
+            }
+        });
+        yesMailBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(isSafeMailDialog()){
+                    SendMail();
+                    SuccesssMailDialog();
+                }else {
+                    ErrorMailDialog();
+                }
+            }
+        });
+    }
+    public void SendMail(){
+        String email = NV_spinner_mini_mail.trim();
+        String subject = inputsubMail.getText().toString().trim();
+        String message = inputmessMail.getText().toString();
+        //Send Mail
+        JavaMailAPI javaMailAPI = new JavaMailAPI(this, email, subject, message);
+
+        javaMailAPI.execute();
+    }
     public void setEventDialog(View view) {
         backBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -802,13 +894,21 @@ public class NhanvienLayout extends AppCompatActivity {
         // Mã NV không được trùng với Mã NV khác và ko để trống
         manv = inputMaNV.getText().toString().trim();
         boolean noError = true;
+        if(PK_spinner_mini_maPK == null){
+            showMPKError.setText("Mã PK không được trống ");
+            showMPKError.setVisibility(View.VISIBLE);
+            noError = false;
+        }else{
+            showMPKError.setVisibility(View.INVISIBLE);
+            if(noError)noError = true;
+        }
         if (manv.equals("")) {
             showMNVError.setText("Mã NV không được trống ");
             showMNVError.setVisibility(View.VISIBLE);
             noError = false;
         } else {
             showMNVError.setVisibility(View.INVISIBLE);
-            noError = true;
+            if(noError)noError = true;
         }
 
         // Tên NV không được để trống và không trùng
@@ -819,7 +919,7 @@ public class NhanvienLayout extends AppCompatActivity {
             noError = false;
         } else {
             showTNVError.setVisibility(View.INVISIBLE);
-            noError = true;
+            if(noError)noError = true;
         }
 
         if (noError) {
@@ -840,6 +940,37 @@ public class NhanvienLayout extends AppCompatActivity {
         }
         return noError;
     }
+    public boolean isSafeMailDialog(){
+        String sub, mess;
+        sub = inputsubMail.getText().toString().trim();
+        mess = inputmessMail.getText().toString();
+        boolean noError = true;
+        if (NV_spinner_mini_mail == null) {
+            showEmailError.setText("Email không được trống ");
+            showEmailError.setVisibility(View.VISIBLE);
+            noError = false;
+        } else {
+            showEmailError.setVisibility(View.INVISIBLE);
+            noError = true;
+        }
+        if (sub.equals("")) {
+            showSubjectError.setText("Tiêu đề không được trống ");
+            showSubjectError.setVisibility(View.VISIBLE);
+            noError = false;
+        } else {
+            showSubjectError.setVisibility(View.INVISIBLE);
+            if(noError)noError = true;
+        }
+        if (mess.equals("")) {
+            showMessageError.setText("Nội dung không được trống ");
+            showMessageError.setVisibility(View.VISIBLE);
+            noError = false;
+        } else {
+            showMessageError.setVisibility(View.INVISIBLE);
+            if(noError)noError = true;
+        }
+        return noError;
+    }
     public void SuccesssDialog(){
         showResult.setText(showLabel.getText() + " thành công !");
         showResult.setTextColor(getResources().getColor(R.color.yes_color));
@@ -856,6 +987,23 @@ public class NhanvienLayout extends AppCompatActivity {
         }, 1000);
     }
     public void ErrorDialog(){
+        showResult.setTextColor(getResources().getColor(R.color.thoatbtn_bgcolor));
+        showResult.setText(showLabel.getText() + " thất bại !");
+        showResult.setVisibility(View.VISIBLE);
+    }
+    public void SuccesssMailDialog(){
+        showResult.setText(showLabel.getText() + " thành công !");
+        showResult.setTextColor(getResources().getColor(R.color.yes_color));
+        showResult.setVisibility(View.VISIBLE);
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                showResult.setVisibility(View.INVISIBLE);
+                maildialog.dismiss();
+            }
+        }, 1000);
+    }
+    public void ErrorMailDialog(){
         showResult.setTextColor(getResources().getColor(R.color.thoatbtn_bgcolor));
         showResult.setText(showLabel.getText() + " thất bại !");
         showResult.setVisibility(View.VISIBLE);
