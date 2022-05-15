@@ -25,6 +25,7 @@ import com.example.myapplication.Entities.PhieuNhap;
 import com.example.myapplication.Entities.PhongKho;
 import com.example.myapplication.Entities.Rows;
 import com.example.myapplication.R;
+import com.example.myapplication.XinChoLayout;
 import com.itextpdf.barcodes.BarcodeQRCode;
 import com.itextpdf.io.font.PdfEncodings;
 import com.itextpdf.io.image.ImageData;
@@ -168,6 +169,11 @@ public class BaoCaoLayout extends AppCompatActivity {
             if( resultCode == RESULT_OK ) {
                 Toast.makeText(BaoCaoLayout.this, "In báo cáo thành công", Toast.LENGTH_LONG).show();
                 int result = data.getIntExtra("result",0);
+                try {
+                    createPDF(selectedPhongKho, selectedPhieuNhap);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
             } else {
                 Toast.makeText(BaoCaoLayout.this, "In báo cáo thất bại", Toast.LENGTH_LONG).show();
             }
@@ -185,14 +191,9 @@ public class BaoCaoLayout extends AppCompatActivity {
         printBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                Intent intent = new Intent(BaoCaoLayout.this, XinChoLayout.class);
-//                overridePendingTransition(R.anim.fadein, R.anim.fadeout);
-//                startActivityForResult( intent, 1 );
-                try {
-                    createPDF(selectedPhongKho, selectedPhieuNhap);
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                }
+                Intent intent = new Intent(BaoCaoLayout.this, XinChoLayout.class);
+                overridePendingTransition(R.anim.fadein, R.anim.fadeout);
+                startActivityForResult( intent, 1 );
             }
         });
         //        PBSpinner

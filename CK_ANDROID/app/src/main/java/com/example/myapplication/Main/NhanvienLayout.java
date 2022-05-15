@@ -153,7 +153,7 @@ public class NhanvienLayout extends AppCompatActivity {
                 nhanvien_table_list.addView(tr);
                 for (int k = 0; k < nhanvienlist.size(); k++) {
                     NhanVien nv = nhanvienlist.get(k);
-                    if (nv.getMaNv().toLowerCase().trim().contains(toString.trim()) || nv.getHoTen().toLowerCase().contains(toString)) {
+                    if (nv.getMaNv().toLowerCase().trim().contains(toString.toLowerCase().trim()) || nv.getHoTen().toLowerCase().contains(toString.toLowerCase())) {
 
                         tr = createRow(NhanvienLayout.this, nv);
 
